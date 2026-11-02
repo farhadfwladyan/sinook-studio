@@ -1,0 +1,1720 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sin∞k | استودیو حرفه‌ای توسعه وب</title>
+    <!-- فونت وزیرمتن برای فارسی و JetBrains Mono برای کدنویسی حرفه‌ای -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- آیکون‌های RemixIcon -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-void: #020308;
+            --panel-bg: rgba(9, 12, 22, 0.75);
+            --header-bg: rgba(7, 9, 18, 0.82);
+            --border-subtle: rgba(255, 255, 255, 0.1);
+            --border-highlight: rgba(99, 102, 241, 0.45);
+            --primary: #6366f1;
+            --accent-cyan: #00f2fe;
+            --accent-purple: #a855f7;
+            --text-main: #f1f5f9;
+            --text-muted: #64748b;
+            --html-color: #ff5722;
+            --css-color: #00b4d8;
+            --js-color: #eab308;
+            --success: #10b981;
+            --danger: #f43f5e;
+
+            /* متغیرهای پنجره کدنویسی (پیش‌فرض: سفید خالص با متن مشکی پررنگ) */
+            --code-bg: #ffffff;
+            --code-text: #090d16;
+            --code-gutter-bg: #f1f5f9;
+            --code-gutter-text: #475569;
+            --code-placeholder: #94a3b8;
+            --code-grid: rgba(15, 23, 42, 0.04);
+            --code-caret: #4f46e5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: var(--bg-void);
+            color: var(--text-main);
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            user-select: none;
+            position: relative;
+        }
+
+        /* ==================== پس‌زمینه فوق‌حرفه‌ای استودیو کدنویسی (IDE Pro Backdrop) ==================== */
+        .pro-studio-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            background: #020308;
+            pointer-events: none;
+        }
+
+        .dot-matrix {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 30%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 30%, transparent 100%);
+        }
+
+        .light-beam {
+            position: absolute;
+            top: -25%;
+            width: 55vw;
+            height: 75vh;
+            filter: blur(95px);
+            opacity: 0.45;
+            mix-blend-mode: screen;
+            transform-origin: top center;
+        }
+
+        .beam-1 {
+            right: 5%;
+            background: conic-gradient(from 180deg at 50% 0%, #4f46e5 0deg, #00f2fe 60deg, transparent 120deg);
+            animation: swayBeam1 14s ease-in-out infinite alternate;
+        }
+
+        .beam-2 {
+            left: 5%;
+            background: conic-gradient(from 180deg at 50% 0%, #ec4899 0deg, #8b5cf6 65deg, transparent 130deg);
+            animation: swayBeam2 18s ease-in-out infinite alternate;
+        }
+
+        .beam-bottom {
+            position: absolute;
+            bottom: -30%;
+            left: 25%;
+            width: 50vw;
+            height: 50vh;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.25), rgba(0, 242, 254, 0.1), transparent 70%);
+            filter: blur(80px);
+            animation: pulseGlow 10s ease-in-out infinite alternate;
+        }
+
+        @keyframes swayBeam1 {
+            0% { transform: rotate(-12deg) scale(1); }
+            100% { transform: rotate(8deg) scale(1.15); }
+        }
+
+        @keyframes swayBeam2 {
+            0% { transform: rotate(10deg) scale(1.1); }
+            100% { transform: rotate(-10deg) scale(0.95); }
+        }
+
+        @keyframes pulseGlow {
+            0% { opacity: 0.3; transform: scale(0.9); }
+            100% { opacity: 0.65; transform: scale(1.15); }
+        }
+
+        #codeMatrixCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.75;
+        }
+
+        /* ==================== Header ==================== */
+        header {
+            height: 64px;
+            background: var(--header-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 200;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 15%;
+            right: 15%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 242, 254, 0.5), rgba(168, 85, 247, 0.6), transparent);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            direction: ltr;
+            unicode-bidi: isolate;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 25px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            text-shadow: 0 0 25px rgba(99, 102, 241, 0.5);
+        }
+
+        .logo .inf-symbol {
+            font-size: 31px;
+            margin: 0 3px;
+            background: linear-gradient(135deg, #00f2fe 0%, #6366f1 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            animation: infinityGlow 4s infinite ease-in-out;
+        }
+
+        @keyframes infinityGlow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.6)); }
+            50% { transform: scale(1.14); filter: drop-shadow(0 0 14px rgba(236, 72, 153, 0.85)); }
+        }
+
+        .badge {
+            font-size: 11px;
+            font-weight: 500;
+            background: rgba(99, 102, 241, 0.14);
+            color: #a5b4fc;
+            padding: 4px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            white-space: nowrap;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 12.5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid var(--border-subtle);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.24);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 4px 18px rgba(79, 70, 229, 0.45);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #6366f1, #9333ea);
+            box-shadow: 0 6px 24px rgba(124, 58, 237, 0.65);
+        }
+
+        .btn i {
+            font-size: 16px;
+        }
+
+        .auto-run-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12.5px;
+            color: #cbd5e1;
+            padding: 7px 13px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid var(--border-subtle);
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .auto-run-toggle:hover {
+            border-color: var(--border-highlight);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+            transition: 0.3s;
+            flex-shrink: 0;
+        }
+
+        .dot.off {
+            background: var(--text-muted);
+            box-shadow: none;
+        }
+
+        /* ==================== Workspace Layout ==================== */
+        .workspace {
+            display: flex;
+            flex: 1;
+            height: calc(100dvh - 64px);
+            position: relative;
+            z-index: 10;
+            padding: 12px;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        /* پنل کدنویسی */
+        .coding-section {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: var(--panel-bg);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            min-width: 280px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            position: relative;
+        }
+
+        .tabs-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(3, 5, 11, 0.85);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0 10px;
+            height: 48px;
+            flex-shrink: 0;
+            gap: 8px;
+        }
+
+        .tabs-group {
+            display: flex;
+            gap: 4px;
+            height: 100%;
+            align-items: flex-end;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .tabs-group::-webkit-scrollbar { display: none; }
+
+        .tab {
+            direction: ltr;
+            unicode-bidi: isolate;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            color: #94a3b8;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .tab:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .tab.active {
+            background: var(--code-bg);
+            color: var(--code-text);
+            border-color: var(--border-subtle);
+            font-weight: 800;
+        }
+
+        .tab.active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 10%;
+            right: 10%;
+            height: 3px;
+            border-radius: 3px;
+        }
+
+        .tab[data-lang="html"].active::before { background: var(--html-color); }
+        .tab[data-lang="css"].active::before { background: var(--css-color); }
+        .tab[data-lang="js"].active::before { background: var(--js-color); }
+
+        .tab i.ri-html5-fill { color: var(--html-color); font-size: 15px; }
+        .tab i.ri-css3-fill { color: var(--css-color); font-size: 15px; }
+        .tab i.ri-javascript-fill { color: var(--js-color); font-size: 15px; }
+
+        /* منوی تغییر رنگ پنجره کدنویسی */
+        .editor-actions-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .theme-picker-wrapper {
+            position: relative;
+        }
+
+        .theme-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: #f8fafc;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 11.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .theme-btn:hover {
+            background: rgba(99, 102, 241, 0.25);
+            border-color: var(--primary);
+        }
+
+        .theme-swatch-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            background: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .theme-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            width: 220px;
+            background: rgba(12, 16, 30, 0.96);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            padding: 8px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 999;
+        }
+
+        .theme-dropdown.open {
+            display: flex;
+            animation: fadeInMenu 0.18s ease;
+        }
+
+        @keyframes fadeInMenu {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .theme-dropdown-header {
+            font-size: 11px;
+            color: #94a3b8;
+            padding: 4px 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 2px;
+        }
+
+        .theme-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 7px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #e2e8f0;
+            transition: 0.15s;
+        }
+
+        .theme-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .theme-item.active {
+            background: rgba(99, 102, 241, 0.22);
+            color: #00f2fe;
+            font-weight: 700;
+        }
+
+        .theme-item-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mini-swatch {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .editor-status {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+            direction: ltr;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ==================== محیط داخلی ادیتور (پیش‌فرض سفید خالص و متن پررنگ) ==================== */
+        .editors-wrapper {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background-color: var(--code-bg);
+            background-image: 
+                linear-gradient(var(--code-grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--code-grid) 1px, transparent 1px);
+            background-size: 24px 24px;
+            transition: background-color 0.25s ease;
+        }
+
+        .editor-box {
+            position: absolute;
+            inset: 0;
+            display: none;
+            direction: ltr;
+        }
+
+        .editor-box.active {
+            display: flex;
+        }
+
+        .line-numbers {
+            width: 48px;
+            padding: 18px 8px;
+            text-align: right;
+            background: var(--code-gutter-bg);
+            border-right: 1px solid rgba(148, 163, 184, 0.25);
+            color: var(--code-gutter-text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13.5px;
+            font-weight: 700;
+            line-height: 25px;
+            overflow: hidden;
+            user-select: none;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        textarea.code-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--code-text);
+            font-family: 'JetBrains Mono', 'Vazirmatn', monospace;
+            font-size: 14.5px;
+            font-weight: 700;
+            line-height: 25px;
+            padding: 18px 16px;
+            resize: none;
+            white-space: pre;
+            overflow-wrap: normal;
+            overflow-x: auto;
+            tab-size: 2;
+            caret-color: var(--code-caret);
+            transition: color 0.25s ease;
+        }
+
+        textarea.code-input::placeholder {
+            color: var(--code-placeholder);
+            font-weight: 500;
+        }
+
+        textarea.code-input::selection {
+            background: rgba(99, 102, 241, 0.28);
+        }
+
+        /* ==================== Resizer (دستگیره تغییر سایز دسکتاپ) ==================== */
+        .gutter {
+            width: 8px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.04);
+            cursor: col-resize;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 50;
+            flex-shrink: 0;
+        }
+
+        .gutter:hover, .gutter.dragging {
+            background: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .gutter::after {
+            content: "";
+            width: 2px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 2px;
+        }
+
+        /* ==================== Preview Section (پنجره خروجی تیره و استودیویی) ==================== */
+        .preview-section {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: var(--panel-bg);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            min-width: 280px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .preview-section.expanded {
+            position: fixed;
+            inset: 10px;
+            width: calc(100vw - 20px) !important;
+            height: calc(100dvh - 20px) !important;
+            z-index: 9999;
+            border-color: var(--border-highlight);
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.95);
+        }
+
+        .browser-bar {
+            height: 48px;
+            background: rgba(3, 5, 11, 0.85);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px;
+            direction: ltr;
+            flex-shrink: 0;
+            gap: 8px;
+        }
+
+        .window-controls {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-shrink: 0;
+        }
+
+        .win-dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        .win-dot:hover { transform: scale(1.2); }
+        .win-dot.close { background: #ff5f56; }
+        .win-dot.min { background: #ffbd2e; }
+        .win-dot.max { background: #27c93f; cursor: pointer; }
+
+        .url-box {
+            direction: ltr;
+            unicode-bidi: isolate;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 4px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            max-width: 260px;
+            width: 100%;
+            justify-content: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .preview-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-main);
+            padding: 5px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 12px;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .icon-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .iframe-wrapper {
+            flex: 1;
+            position: relative;
+            background: transparent;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            background: transparent;
+        }
+
+        .empty-preview-state {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .empty-preview-state.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .empty-orb {
+            width: 68px;
+            height: 68px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(0, 242, 254, 0.1));
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: #818cf8;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+        }
+
+        .empty-preview-state h3 {
+            font-size: 16px;
+            color: #e2e8f0;
+            margin-bottom: 8px;
+        }
+
+        .empty-preview-state p {
+            font-size: 13px;
+            color: var(--text-muted);
+            max-width: 310px;
+            line-height: 1.7;
+        }
+
+        .drag-shield {
+            position: absolute;
+            inset: 0;
+            display: none;
+            z-index: 20;
+        }
+
+        /* ==================== Console Drawer ==================== */
+        .console-drawer {
+            height: 155px;
+            background: rgba(4, 6, 14, 0.96);
+            border-top: 1px solid var(--border-subtle);
+            display: none;
+            flex-direction: column;
+            direction: ltr;
+            flex-shrink: 0;
+        }
+
+        .console-drawer.open {
+            display: flex;
+        }
+
+        .console-header {
+            padding: 7px 14px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            color: var(--text-muted);
+        }
+
+        .console-logs {
+            flex: 1;
+            padding: 10px 14px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .log-item {
+            padding: 5px 10px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 3px solid var(--accent-cyan);
+            color: #e2e8f0;
+            word-break: break-word;
+        }
+
+        .log-item.error {
+            border-left-color: var(--danger);
+            background: rgba(244, 63, 94, 0.12);
+            color: #fda4af;
+        }
+
+        /* ==================== نوار سوئیچ مخصوص موبایل و تبلت ==================== */
+        .mobile-nav-bar {
+            display: none;
+            height: 56px;
+            background: rgba(7, 9, 18, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-subtle);
+            padding: 6px 12px;
+            gap: 8px;
+            z-index: 300;
+            flex-shrink: 0;
+        }
+
+        .mobile-nav-btn {
+            flex: 1;
+            border: 1px solid var(--border-subtle);
+            background: rgba(255, 255, 255, 0.03);
+            color: #94a3b8;
+            border-radius: 12px;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .mobile-nav-btn.active {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.25), rgba(124, 58, 237, 0.25));
+            border-color: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            background: rgba(10, 14, 26, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-highlight);
+            color: #fff;
+            padding: 11px 18px;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.65);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12.5px;
+            transform: translateY(120px);
+            opacity: 0;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* ==================== طراحی کاملاً ریسپانسیو برای موبایل و تبلت ==================== */
+        @media (max-width: 960px) {
+            header {
+                height: 58px;
+                padding: 0 12px;
+            }
+
+            .badge,
+            .btn span,
+            .auto-run-toggle span:not(.dot),
+            .editor-status {
+                display: none;
+            }
+
+            .logo {
+                font-size: 22px;
+            }
+            .logo .inf-symbol {
+                font-size: 26px;
+            }
+
+            .btn {
+                padding: 8px 11px;
+            }
+
+            .auto-run-toggle {
+                padding: 8px 10px;
+            }
+
+            .workspace {
+                height: calc(100dvh - 114px);
+                padding: 8px;
+                gap: 0;
+            }
+
+            .gutter {
+                display: none;
+            }
+
+            .coding-section,
+            .preview-section {
+                width: 100% !important;
+                min-width: unset;
+                height: 100%;
+                border-radius: 14px;
+            }
+
+            /* در موبایل هر لحظه یکی از پنل‌ها با کیفیت کامل نمایش داده می‌شود */
+            .workspace[data-mobile-view="code"] .preview-section {
+                display: none;
+            }
+            .workspace[data-mobile-view="preview"] .coding-section {
+                display: none;
+            }
+
+            .mobile-nav-bar {
+                display: flex;
+            }
+
+            .url-box {
+                display: none;
+            }
+
+            .tab {
+                padding: 9px 11px;
+                font-size: 11.5px;
+            }
+
+            .theme-btn span.theme-label-text {
+                display: none;
+            }
+
+            .toast {
+                bottom: 68px;
+                left: 12px;
+                right: 12px;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .line-numbers {
+                width: 38px;
+                padding: 14px 5px;
+                font-size: 12px;
+            }
+
+            textarea.code-input {
+                font-size: 13.5px;
+                padding: 14px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- پس‌زمینه فوق‌حرفه‌ای استودیویی -->
+    <div class="pro-studio-bg">
+        <div class="light-beam beam-1"></div>
+        <div class="light-beam beam-2"></div>
+        <div class="beam-bottom"></div>
+        <div class="dot-matrix"></div>
+        <canvas id="codeMatrixCanvas"></canvas>
+    </div>
+
+    <!-- نوار بالایی -->
+    <header>
+        <div class="brand">
+            <div class="logo" dir="ltr">Sin<span class="inf-symbol">∞</span>k</div>
+            <span class="badge">نسخه استودیو پرو</span>
+        </div>
+
+        <div class="toolbar">
+            <div class="auto-run-toggle" id="autoRunBtn" title="اجرای خودکار هنگام تایپ">
+                <span class="dot" id="autoRunDot"></span>
+                <span>پیش‌نمایش زنده</span>
+            </div>
+
+            <button class="btn btn-primary" onclick="runCode(true)" title="اجرای کد">
+                <i class="ri-play-fill"></i>
+                <span>اجرای کد</span>
+            </button>
+
+            <button class="btn" onclick="togglePreviewFullscreen()" title="بزرگنمایی کامل پنجره خروجی">
+                <i class="ri-fullscreen-line"></i>
+                <span>بزرگنمایی خروجی</span>
+            </button>
+
+            <button class="btn" onclick="downloadProject()" title="دانلود فایل کامل HTML">
+                <i class="ri-download-cloud-2-line"></i>
+                <span>دانلود پروژه</span>
+            </button>
+
+            <button class="btn" onclick="clearAllEditors()" title="پاک کردن تمام کدها">
+                <i class="ri-delete-bin-6-line"></i>
+                <span>پاکسازی</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- محیط کاری اصلی -->
+    <main class="workspace" id="workspace" data-mobile-view="code">
+
+        <!-- بخش کدنویسی (پیش‌فرض سفید خالص + متن پررنگ + منوی تغییر رنگ) -->
+        <section class="coding-section" id="codingPanel">
+            <div class="tabs-bar">
+                <div class="tabs-group">
+                    <button class="tab active" data-lang="html" onclick="switchTab('html')">
+                        <i class="ri-html5-fill"></i> index.html
+                    </button>
+                    <button class="tab" data-lang="css" onclick="switchTab('css')">
+                        <i class="ri-css3-fill"></i> style.css
+                    </button>
+                    <button class="tab" data-lang="js" onclick="switchTab('js')">
+                        <i class="ri-javascript-fill"></i> script.js
+                    </button>
+                </div>
+
+                <div class="editor-actions-right">
+                    <!-- منوی تغییر رنگ پنجره کدنویسی -->
+                    <div class="theme-picker-wrapper">
+                        <button class="theme-btn" onclick="toggleThemeDropdown(event)" title="تغییر رنگ پنجره کدنویسی">
+                            <span class="theme-swatch-dot" id="activeSwatchDot"></span>
+                            <span class="theme-label-text">رنگ پنجره کد</span>
+                            <i class="ri-palette-line" style="color: #00f2fe; font-size: 14px;"></i>
+                        </button>
+
+                        <div class="theme-dropdown" id="themeDropdown" onclick="event.stopPropagation()">
+                            <div class="theme-dropdown-header">انتخاب تم پنجره کدنویسی</div>
+
+                            <div class="theme-item active" onclick="changeEditorTheme('white', this)">
+                                <div class="theme-item-left">
+                                    <span class="mini-swatch" style="background: #ffffff; color: #090d16;">Aa</span>
+                                    <span>سفید خالص (پیش‌فرض)</span>
+                                </div>
+                                <i class="ri-check-line"></i>
+                            </div>
+
+                            <div class="theme-item" onclick="changeEditorTheme('studio-dark', this)">
+                                <div class="theme-item-left">
+                                    <span class="mini-swatch" style="background: #070a14; color: #f1f5f9;">Aa</span>
+                                    <span>تیره استودیویی (Dark)</span>
+                                </div>
+                            </div>
+
+                            <div class="theme-item" onclick="changeEditorTheme('silver', this)">
+                                <div class="theme-item-left">
+                                    <span class="mini-swatch" style="background: #f1f5f9; color: #0f172a;">Aa</span>
+                                    <span>نقره‌ای ملایم</span>
+                                </div>
+                            </div>
+
+                            <div class="theme-item" onclick="changeEditorTheme('warm', this)">
+                                <div class="theme-item-left">
+                                    <span class="mini-swatch" style="background: #fefce8; color: #1c1917;">Aa</span>
+                                    <span>کرمی کاغذی</span>
+                                </div>
+                            </div>
+
+                            <div class="theme-item" onclick="changeEditorTheme('ice', this)">
+                                <div class="theme-item-left">
+                                    <span class="mini-swatch" style="background: #ecfeff; color: #083344;">Aa</span>
+                                    <span>آبی یخی</span>
+                                </div>
+                            </div>
+
+                            <div class="theme-item" onclick="changeEditorTheme('cyber', this)">
+                                <div class="theme-item-left">
+                                    <span class="mini-swatch" style="background: #050811; color: #00f2fe;">Aa</span>
+                                    <span>نئون سایبرپانک</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="editor-status">
+                        <span id="cursorPos">Ln 1, Col 1</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="editors-wrapper">
+                <!-- ادیتور HTML -->
+                <div class="editor-box active" id="box-html">
+                    <div class="line-numbers" id="lines-html">1</div>
+                    <textarea class="code-input" id="code-html" spellcheck="false" placeholder="<!-- کدهای HTML خود را اینجا بنویسید... -->"></textarea>
+                </div>
+
+                <!-- ادیتور CSS -->
+                <div class="editor-box" id="box-css">
+                    <div class="line-numbers" id="lines-css">1</div>
+                    <textarea class="code-input" id="code-css" spellcheck="false" placeholder="/* استایل‌های CSS خود را اینجا بنویسید... */"></textarea>
+                </div>
+
+                <!-- ادیتور JS -->
+                <div class="editor-box" id="box-js">
+                    <div class="line-numbers" id="lines-js">1</div>
+                    <textarea class="code-input" id="code-js" spellcheck="false" placeholder="// کدهای JavaScript خود را اینجا بنویسید..."></textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- دستگیره تغییر سایز پنل‌ها -->
+        <div class="gutter" id="gutter" title="برای تغییر اندازه پنل بکشید"></div>
+
+        <!-- بخش خروجی و پیش‌نمایش -->
+        <section class="preview-section" id="previewPanel">
+            <div class="browser-bar">
+                <div class="window-controls">
+                    <span class="win-dot close"></span>
+                    <span class="win-dot min"></span>
+                    <span class="win-dot max" onclick="togglePreviewFullscreen()" title="بزرگنمایی"></span>
+                </div>
+
+                <div class="url-box" dir="ltr">
+                    <i class="ri-terminal-window-line" style="color: #00f2fe;"></i>
+                    <span>sinook://live-preview</span>
+                </div>
+
+                <div class="preview-actions">
+                    <button class="icon-btn" onclick="toggleConsole()" title="نمایش کنسول جاوااسکریپت">
+                        <i class="ri-terminal-box-line"></i>
+                        <span>کنسول</span>
+                        <span id="logCount" style="background: var(--primary); padding: 0 6px; border-radius: 99px; font-size: 10px;">0</span>
+                    </button>
+
+                    <button class="icon-btn" onclick="openInNewTab()" title="اجرا در تب مستقل مرورگر">
+                        <i class="ri-external-link-line"></i>
+                    </button>
+
+                    <button class="icon-btn" id="expandBtn" onclick="togglePreviewFullscreen()">
+                        <i class="ri-aspect-ratio-line" id="expandIcon"></i>
+                        <span id="expandText">تمام‌صفحه</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="iframe-wrapper" id="iframeWrapper">
+                <div class="drag-shield" id="dragShield"></div>
+
+                <!-- وضعیت خالی بودن کدها -->
+                <div class="empty-preview-state" id="emptyState">
+                    <div class="empty-orb">
+                        <i class="ri-code-s-slash-line"></i>
+                    </div>
+                    <h3>آماده شروع کدنویسی در <span dir="ltr">Sin∞k</span></h3>
+                    <p>کدهای HTML، CSS یا جاوااسکریپت خود را وارد کنید تا خروجی به صورت زنده در این پنجره نمایش داده شود.</p>
+                </div>
+
+                <iframe id="previewFrame" sandbox="allow-scripts allow-modals"></iframe>
+            </div>
+
+            <!-- کنسول اختصاصی جاوااسکریپت -->
+            <div class="console-drawer" id="consoleDrawer">
+                <div class="console-header">
+                    <span dir="ltr"><i class="ri-terminal-line"></i> Sin∞k Console Output</span>
+                    <button class="icon-btn" onclick="clearConsole()" style="padding: 2px 8px;">پاک کردن</button>
+                </div>
+                <div class="console-logs" id="consoleLogs"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- نوار سوئیچ پایین صفحه مخصوص موبایل -->
+    <nav class="mobile-nav-bar">
+        <button class="mobile-nav-btn active" id="mobCodeBtn" onclick="setMobileView('code')">
+            <i class="ri-code-box-line"></i>
+            <span>پنجره کدنویسی</span>
+        </button>
+        <button class="mobile-nav-btn" id="mobPreviewBtn" onclick="setMobileView('preview')">
+            <i class="ri-eye-line"></i>
+            <span>پیش‌نمایش زنده</span>
+        </button>
+    </nav>
+
+    <!-- پیغام پاپ‌آپ -->
+    <div class="toast" id="toast">
+        <i class="ri-flashlight-fill" style="color: #00f2fe; font-size: 18px;"></i>
+        <span id="toastMsg">عملیات با موفقیت انجام شد</span>
+    </div>
+
+    <script>
+        /* ==================== مدیریت تم‌های پنجره کدنویسی ==================== */
+        const editorThemes = {
+            'white': {
+                bg: '#ffffff',
+                text: '#090d16',
+                gutterBg: '#f1f5f9',
+                gutterText: '#475569',
+                placeholder: '#94a3b8',
+                grid: 'rgba(15, 23, 42, 0.04)',
+                caret: '#4f46e5',
+                name: 'سفید خالص'
+            },
+            'studio-dark': {
+                bg: '#070a14',
+                text: '#f1f5f9',
+                gutterBg: '#04060c',
+                gutterText: '#64748b',
+                placeholder: '#475569',
+                grid: 'rgba(255, 255, 255, 0.02)',
+                caret: '#00f2fe',
+                name: 'تیره استودیویی'
+            },
+            'silver': {
+                bg: '#f1f5f9',
+                text: '#0f172a',
+                gutterBg: '#e2e8f0',
+                gutterText: '#475569',
+                placeholder: '#64748b',
+                grid: 'rgba(15, 23, 42, 0.05)',
+                caret: '#4f46e5',
+                name: 'نقره‌ای ملایم'
+            },
+            'warm': {
+                bg: '#fefce8',
+                text: '#1c1917',
+                gutterBg: '#fef9c3',
+                gutterText: '#78350f',
+                placeholder: '#a8a29e',
+                grid: 'rgba(120, 53, 15, 0.05)',
+                caret: '#ea580c',
+                name: 'کرمی کاغذی'
+            },
+            'ice': {
+                bg: '#ecfeff',
+                text: '#083344',
+                gutterBg: '#cffafe',
+                gutterText: '#155e75',
+                placeholder: '#64748b',
+                grid: 'rgba(8, 51, 68, 0.05)',
+                caret: '#0284c7',
+                name: 'آبی یخی'
+            },
+            'cyber': {
+                bg: '#050811',
+                text: '#00f2fe',
+                gutterBg: '#020409',
+                gutterText: '#6366f1',
+                placeholder: '#334155',
+                grid: 'rgba(0, 242, 254, 0.04)',
+                caret: '#ec4899',
+                name: 'نئون سایبرپانک'
+            }
+        };
+
+        function toggleThemeDropdown(e) {
+            e.stopPropagation();
+            document.getElementById('themeDropdown').classList.toggle('open');
+        }
+
+        window.addEventListener('click', () => {
+            document.getElementById('themeDropdown').classList.remove('open');
+        });
+
+        function changeEditorTheme(themeKey, itemEl) {
+            const t = editorThemes[themeKey];
+            if (!t) return;
+
+            const root = document.documentElement;
+            root.style.setProperty('--code-bg', t.bg);
+            root.style.setProperty('--code-text', t.text);
+            root.style.setProperty('--code-gutter-bg', t.gutterBg);
+            root.style.setProperty('--code-gutter-text', t.gutterText);
+            root.style.setProperty('--code-placeholder', t.placeholder);
+            root.style.setProperty('--code-grid', t.grid);
+            root.style.setProperty('--code-caret', t.caret);
+
+            document.getElementById('activeSwatchDot').style.background = t.bg;
+
+            document.querySelectorAll('.theme-item').forEach(el => {
+                el.classList.remove('active');
+                const icon = el.querySelector('.ri-check-line');
+                if (icon) icon.remove();
+            });
+
+            itemEl.classList.add('active');
+            const check = document.createElement('i');
+            check.className = 'ri-check-line';
+            itemEl.appendChild(check);
+
+            document.getElementById('themeDropdown').classList.remove('open');
+            showToast(`تم پنجره کد به «${t.name}» تغییر یافت`);
+        }
+
+        /* ==================== مدیریت نمایش در موبایل ==================== */
+        function setMobileView(view) {
+            const workspace = document.getElementById('workspace');
+            const codeBtn = document.getElementById('mobCodeBtn');
+            const previewBtn = document.getElementById('mobPreviewBtn');
+
+            workspace.setAttribute('data-mobile-view', view);
+            codeBtn.classList.toggle('active', view === 'code');
+            previewBtn.classList.toggle('active', view === 'preview');
+        }
+
+        /* ==================== انیمیشن پس‌زمینه کدنویسی حرفه‌ای ==================== */
+        const canvas = document.getElementById('codeMatrixCanvas');
+        const ctx = canvas.getContext('2d');
+        let elements = [];
+        const codeSymbols = ['</>', '{ }', '()', '=>', 'const', 'let', '∞', 'div', 'px', 'flex', 'async', '01', '[];', '#'];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class StudioNode {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * canvas.height;
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + 30;
+                this.isSymbol = Math.random() > 0.55;
+                this.text = codeSymbols[Math.floor(Math.random() * codeSymbols.length)];
+                this.size = this.isSymbol ? (Math.random() * 4 + 10) : (Math.random() * 2 + 1);
+                this.speedY = -(Math.random() * 0.45 + 0.15);
+                this.speedX = (Math.random() - 0.5) * 0.25;
+                this.opacity = Math.random() * 0.25 + 0.05;
+                const colors = ['#6366f1', '#00f2fe', '#a855f7', '#64748b'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                if (this.y < -30 || this.x < -30 || this.x > canvas.width + 30) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                if (this.isSymbol) {
+                    ctx.font = `500 ${this.size}px 'JetBrains Mono', monospace`;
+                    ctx.fillStyle = this.color;
+                    ctx.fillText(this.text, this.x, this.y);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = this.color;
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        }
+
+        function initStudioCanvas() {
+            elements = [];
+            const count = Math.min(Math.floor(window.innerWidth / 25), 55);
+            for (let i = 0; i < count; i++) {
+                elements.push(new StudioNode());
+            }
+        }
+
+        function animateStudioCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < elements.length; i++) {
+                elements[i].update();
+                elements[i].draw();
+            }
+            requestAnimationFrame(animateStudioCanvas);
+        }
+        initStudioCanvas();
+        animateStudioCanvas();
+
+        /* ==================== منطق اصلی ویرایشگر ==================== */
+        const htmlInput = document.getElementById('code-html');
+        const cssInput = document.getElementById('code-css');
+        const jsInput = document.getElementById('code-js');
+        const previewFrame = document.getElementById('previewFrame');
+        const emptyState = document.getElementById('emptyState');
+        const cursorPosLabel = document.getElementById('cursorPos');
+
+        let autoRun = true;
+        let debounceTimer;
+        let logCounter = 0;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            htmlInput.value = '';
+            cssInput.value = '';
+            jsInput.value = '';
+
+            ['html', 'css', 'js'].forEach(lang => {
+                updateLineNumbers(lang);
+                setupEditorEvents(lang);
+            });
+
+            runCode();
+        });
+
+        function switchTab(lang) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.editor-box').forEach(b => b.classList.remove('active'));
+
+            document.querySelector(`.tab[data-lang="${lang}"]`).classList.add('active');
+            document.getElementById(`box-${lang}`).classList.add('active');
+            const activeTextarea = document.getElementById(`code-${lang}`);
+            activeTextarea.focus();
+            updateCursorPosition(activeTextarea);
+        }
+
+        function updateCursorPosition(textarea) {
+            const textUpToCursor = textarea.value.substring(0, textarea.selectionStart);
+            const lines = textUpToCursor.split('\n');
+            const currentLine = lines.length;
+            const currentCol = lines[lines.length - 1].length + 1;
+            cursorPosLabel.textContent = `Ln ${currentLine}, Col ${currentCol}`;
+        }
+
+        function setupEditorEvents(lang) {
+            const textarea = document.getElementById(`code-${lang}`);
+            const lineNums = document.getElementById(`lines-${lang}`);
+
+            textarea.addEventListener('input', () => {
+                updateLineNumbers(lang);
+                updateCursorPosition(textarea);
+                if (autoRun) {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => runCode(), 350);
+                }
+            });
+
+            textarea.addEventListener('click', () => updateCursorPosition(textarea));
+            textarea.addEventListener('keyup', () => updateCursorPosition(textarea));
+
+            textarea.addEventListener('scroll', () => {
+                lineNums.scrollTop = textarea.scrollTop;
+            });
+
+            textarea.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    textarea.value = textarea.value.substring(0, start) + "  " + textarea.value.substring(end);
+                    textarea.selectionStart = textarea.selectionEnd = start + 2;
+                    updateLineNumbers(lang);
+                    updateCursorPosition(textarea);
+                }
+            });
+        }
+
+        function updateLineNumbers(lang) {
+            const textarea = document.getElementById(`code-${lang}`);
+            const lineNums = document.getElementById(`lines-${lang}`);
+            const linesCount = textarea.value.split('\n').length;
+            let linesHTML = '';
+            for (let i = 1; i <= linesCount; i++) {
+                linesHTML += i + '<br>';
+            }
+            lineNums.innerHTML = linesHTML;
+        }
+
+        function runCode(manual = false) {
+            clearConsole();
+            const html = htmlInput.value.trim();
+            const css = cssInput.value.trim();
+            const js = jsInput.value.trim();
+
+            const isCompletelyEmpty = !html && !css && !js;
+            emptyState.classList.toggle('hidden', !isCompletelyEmpty);
+
+            if (isCompletelyEmpty) {
+                previewFrame.srcdoc = '';
+                if (manual) showToast('ابتدا کدی در ویرایشگر بنویسید!');
+                return;
+            }
+
+            const combinedSource = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <style>
+                        body { color: #f1f5f9; font-family: sans-serif; margin: 0; padding: 16px; }
+                        ${css}
+                    </style>
+                </head>
+                <body>
+                    ${html}
+                    <script>
+                        const _log = console.log;
+                        const _error = console.error;
+                        console.log = (...args) => {
+                            window.parent.postMessage({ type: 'log', data: args.join(' ') }, '*');
+                            _log.apply(console, args);
+                        };
+                        console.error = (...args) => {
+                            window.parent.postMessage({ type: 'error', data: args.join(' ') }, '*');
+                            _error.apply(console, args);
+                        };
+                        window.onerror = (msg, url, line) => {
+                            window.parent.postMessage({ type: 'error', data: msg + ' (Line: ' + line + ')' }, '*');
+                        };
+
+                        try {
+                            ${js}
+                        } catch (err) {
+                            console.error(err.message);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `;
+
+            previewFrame.srcdoc = combinedSource;
+            if (manual) {
+                showToast('کدها با موفقیت اجرا شدند!');
+                if (window.innerWidth <= 960) {
+                    setMobileView('preview');
+                }
+            }
+        }
+
+        window.addEventListener('message', (event) => {
+            if (!event.data || !event.data.type) return;
+            const logsContainer = document.getElementById('consoleLogs');
+            const item = document.createElement('div');
+            item.className = 'log-item ' + (event.data.type === 'error' ? 'error' : '');
+            item.textContent = `> ${event.data.data}`;
+            logsContainer.appendChild(item);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+
+            logCounter++;
+            document.getElementById('logCount').textContent = logCounter;
+        });
+
+        function clearConsole() {
+            document.getElementById('consoleLogs').innerHTML = '';
+            logCounter = 0;
+            document.getElementById('logCount').textContent = '0';
+        }
+
+        function toggleConsole() {
+            document.getElementById('consoleDrawer').classList.toggle('open');
+        }
+
+        function togglePreviewFullscreen() {
+            const previewPanel = document.getElementById('previewPanel');
+            const expandIcon = document.getElementById('expandIcon');
+            const expandText = document.getElementById('expandText');
+
+            if (window.innerWidth <= 960) {
+                setMobileView('preview');
+            }
+
+            previewPanel.classList.toggle('expanded');
+            const isExpanded = previewPanel.classList.contains('expanded');
+
+            if (isExpanded) {
+                expandIcon.className = 'ri-fullscreen-exit-line';
+                expandText.textContent = 'کوچک‌نمایی';
+                showToast('پنجره خروجی تمام‌صفحه شد');
+            } else {
+                expandIcon.className = 'ri-aspect-ratio-line';
+                expandText.textContent = 'تمام‌صفحه';
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const previewPanel = document.getElementById('previewPanel');
+                if (previewPanel.classList.contains('expanded')) {
+                    togglePreviewFullscreen();
+                }
+            }
+        });
+
+        function openInNewTab() {
+            const html = htmlInput.value;
+            const css = cssInput.value;
+            const js = jsInput.value;
+
+            const fullCode = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Sin∞k Live Output</title><style>${css}</style></head><body>${html}<script>${js}<\/script></body></html>`;
+            const blob = new Blob([fullCode], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+        }
+
+        // تغییر سایز پنل‌ها با ماوس در دسکتاپ
+        const gutter = document.getElementById('gutter');
+        const codingPanel = document.getElementById('codingPanel');
+        const workspace = document.getElementById('workspace');
+        const dragShield = document.getElementById('dragShield');
+        let isDragging = false;
+
+        gutter.addEventListener('mousedown', () => {
+            isDragging = true;
+            gutter.classList.add('dragging');
+            dragShield.style.display = 'block';
+            document.body.style.cursor = 'col-resize';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const workspaceRect = workspace.getBoundingClientRect();
+            const newCodingWidth = workspaceRect.right - e.clientX;
+            const percentage = (newCodingWidth / workspaceRect.width) * 100;
+
+            if (percentage > 18 && percentage < 82) {
+                codingPanel.style.width = `${percentage}%`;
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                gutter.classList.remove('dragging');
+                dragShield.style.display = 'none';
+                document.body.style.cursor = 'default';
+            }
+        });
+
+        document.getElementById('autoRunBtn').addEventListener('click', () => {
+            autoRun = !autoRun;
+            document.getElementById('autoRunDot').classList.toggle('off', !autoRun);
+            showToast(autoRun ? 'پیش‌نمایش زنده فعال شد' : 'پیش‌نمایش زنده غیرفعال شد');
+        });
+
+        function downloadProject() {
+            const fullSource = `<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sin∞k Exported Project</title>
+    <style>
+${cssInput.value}
+    </style>
+</head>
+<body>
+${htmlInput.value}
+
+    <script>
+${jsInput.value}
+    <\/script>
+</body>
+</html>`;
+
+            const blob = new Blob([fullSource], { type: 'text/html;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'sinook-project.html';
+            link.click();
+            showToast('فایل پروژه با موفقیت دانلود شد!');
+        }
+
+        function clearAllEditors() {
+            if (!htmlInput.value && !cssInput.value && !jsInput.value) return;
+            if (confirm('آیا می‌خواهید تمام کدهای نوشته شده پاک شوند؟')) {
+                htmlInput.value = '';
+                cssInput.value = '';
+                jsInput.value = '';
+                ['html', 'css', 'js'].forEach(updateLineNumbers);
+                runCode();
+                showToast('محیط کدنویسی پاکسازی شد');
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2800);
+        }
+    </script>
+</body>
+</html>
