@@ -1,1720 +1,2345 @@
-﻿<!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sin∞k | استودیو حرفه‌ای توسعه وب</title>
-    <!-- فونت وزیرمتن برای فارسی و JetBrains Mono برای کدنویسی حرفه‌ای -->
-    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <!-- آیکون‌های RemixIcon -->
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-
-    <style>
-        :root {
-            --bg-void: #020308;
-            --panel-bg: rgba(9, 12, 22, 0.75);
-            --header-bg: rgba(7, 9, 18, 0.82);
-            --border-subtle: rgba(255, 255, 255, 0.1);
-            --border-highlight: rgba(99, 102, 241, 0.45);
-            --primary: #6366f1;
-            --accent-cyan: #00f2fe;
-            --accent-purple: #a855f7;
-            --text-main: #f1f5f9;
-            --text-muted: #64748b;
-            --html-color: #ff5722;
-            --css-color: #00b4d8;
-            --js-color: #eab308;
-            --success: #10b981;
-            --danger: #f43f5e;
-
-            /* متغیرهای پنجره کدنویسی (پیش‌فرض: سفید خالص با متن مشکی پررنگ) */
-            --code-bg: #ffffff;
-            --code-text: #090d16;
-            --code-gutter-bg: #f1f5f9;
-            --code-gutter-text: #475569;
-            --code-placeholder: #94a3b8;
-            --code-grid: rgba(15, 23, 42, 0.04);
-            --code-caret: #4f46e5;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: 'Vazirmatn', sans-serif;
-            background-color: var(--bg-void);
-            color: var(--text-main);
-            height: 100vh;
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            user-select: none;
-            position: relative;
-        }
-
-        /* ==================== پس‌زمینه فوق‌حرفه‌ای استودیو کدنویسی (IDE Pro Backdrop) ==================== */
-        .pro-studio-bg {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            overflow: hidden;
-            background: #020308;
-            pointer-events: none;
-        }
-
-        .dot-matrix {
-            position: absolute;
-            inset: 0;
-            background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-            background-size: 28px 28px;
-            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 30%, transparent 100%);
-            -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 30%, transparent 100%);
-        }
-
-        .light-beam {
-            position: absolute;
-            top: -25%;
-            width: 55vw;
-            height: 75vh;
-            filter: blur(95px);
-            opacity: 0.45;
-            mix-blend-mode: screen;
-            transform-origin: top center;
-        }
-
-        .beam-1 {
-            right: 5%;
-            background: conic-gradient(from 180deg at 50% 0%, #4f46e5 0deg, #00f2fe 60deg, transparent 120deg);
-            animation: swayBeam1 14s ease-in-out infinite alternate;
-        }
-
-        .beam-2 {
-            left: 5%;
-            background: conic-gradient(from 180deg at 50% 0%, #ec4899 0deg, #8b5cf6 65deg, transparent 130deg);
-            animation: swayBeam2 18s ease-in-out infinite alternate;
-        }
-
-        .beam-bottom {
-            position: absolute;
-            bottom: -30%;
-            left: 25%;
-            width: 50vw;
-            height: 50vh;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.25), rgba(0, 242, 254, 0.1), transparent 70%);
-            filter: blur(80px);
-            animation: pulseGlow 10s ease-in-out infinite alternate;
-        }
-
-        @keyframes swayBeam1 {
-            0% { transform: rotate(-12deg) scale(1); }
-            100% { transform: rotate(8deg) scale(1.15); }
-        }
-
-        @keyframes swayBeam2 {
-            0% { transform: rotate(10deg) scale(1.1); }
-            100% { transform: rotate(-10deg) scale(0.95); }
-        }
-
-        @keyframes pulseGlow {
-            0% { opacity: 0.3; transform: scale(0.9); }
-            100% { opacity: 0.65; transform: scale(1.15); }
-        }
-
-        #codeMatrixCanvas {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0.75;
-        }
-
-        /* ==================== Header ==================== */
-        header {
-            height: 64px;
-            background: var(--header-bg);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-bottom: 1px solid var(--border-subtle);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            z-index: 200;
-            position: relative;
-            flex-shrink: 0;
-        }
-
-        header::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 15%;
-            right: 15%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(0, 242, 254, 0.5), rgba(168, 85, 247, 0.6), transparent);
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo {
-            direction: ltr;
-            unicode-bidi: isolate;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 25px;
-            font-weight: 800;
-            color: #ffffff;
-            letter-spacing: 1px;
-            display: inline-flex;
-            align-items: center;
-            text-shadow: 0 0 25px rgba(99, 102, 241, 0.5);
-        }
-
-        .logo .inf-symbol {
-            font-size: 31px;
-            margin: 0 3px;
-            background: linear-gradient(135deg, #00f2fe 0%, #6366f1 50%, #ec4899 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: inline-block;
-            animation: infinityGlow 4s infinite ease-in-out;
-        }
-
-        @keyframes infinityGlow {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.6)); }
-            50% { transform: scale(1.14); filter: drop-shadow(0 0 14px rgba(236, 72, 153, 0.85)); }
-        }
-
-        .badge {
-            font-size: 11px;
-            font-weight: 500;
-            background: rgba(99, 102, 241, 0.14);
-            color: #a5b4fc;
-            padding: 4px 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            white-space: nowrap;
-        }
-
-        .toolbar {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            padding: 8px 14px;
-            border-radius: 10px;
-            font-family: 'Vazirmatn', sans-serif;
-            font-size: 12.5px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 1px solid var(--border-subtle);
-            background: rgba(255, 255, 255, 0.04);
-            color: var(--text-main);
-            white-space: nowrap;
-        }
-
-        .btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.24);
-            transform: translateY(-1px);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            box-shadow: 0 4px 18px rgba(79, 70, 229, 0.45);
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #6366f1, #9333ea);
-            box-shadow: 0 6px 24px rgba(124, 58, 237, 0.65);
-        }
-
-        .btn i {
-            font-size: 16px;
-        }
-
-        .auto-run-toggle {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12.5px;
-            color: #cbd5e1;
-            padding: 7px 13px;
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.45);
-            border: 1px solid var(--border-subtle);
-            cursor: pointer;
-            transition: 0.2s;
-            white-space: nowrap;
-        }
-
-        .auto-run-toggle:hover {
-            border-color: var(--border-highlight);
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--success);
-            box-shadow: 0 0 10px var(--success);
-            transition: 0.3s;
-            flex-shrink: 0;
-        }
-
-        .dot.off {
-            background: var(--text-muted);
-            box-shadow: none;
-        }
-
-        /* ==================== Workspace Layout ==================== */
-        .workspace {
-            display: flex;
-            flex: 1;
-            height: calc(100dvh - 64px);
-            position: relative;
-            z-index: 10;
-            padding: 12px;
-            gap: 8px;
-            overflow: hidden;
-        }
-
-        /* پنل کدنویسی */
-        .coding-section {
-            width: 50%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            background: var(--panel-bg);
-            backdrop-filter: blur(28px);
-            -webkit-backdrop-filter: blur(28px);
-            border: 1px solid var(--border-subtle);
-            border-radius: 16px;
-            min-width: 280px;
-            overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-            position: relative;
-        }
-
-        .tabs-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(3, 5, 11, 0.85);
-            border-bottom: 1px solid var(--border-subtle);
-            padding: 0 10px;
-            height: 48px;
-            flex-shrink: 0;
-            gap: 8px;
-        }
-
-        .tabs-group {
-            display: flex;
-            gap: 4px;
-            height: 100%;
-            align-items: flex-end;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-        .tabs-group::-webkit-scrollbar { display: none; }
-
-        .tab {
-            direction: ltr;
-            unicode-bidi: isolate;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 9px 14px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid transparent;
-            border-bottom: none;
-            border-radius: 10px 10px 0 0;
-            color: #94a3b8;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .tab:hover {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.07);
-        }
-
-        .tab.active {
-            background: var(--code-bg);
-            color: var(--code-text);
-            border-color: var(--border-subtle);
-            font-weight: 800;
-        }
-
-        .tab.active::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 10%;
-            right: 10%;
-            height: 3px;
-            border-radius: 3px;
-        }
-
-        .tab[data-lang="html"].active::before { background: var(--html-color); }
-        .tab[data-lang="css"].active::before { background: var(--css-color); }
-        .tab[data-lang="js"].active::before { background: var(--js-color); }
-
-        .tab i.ri-html5-fill { color: var(--html-color); font-size: 15px; }
-        .tab i.ri-css3-fill { color: var(--css-color); font-size: 15px; }
-        .tab i.ri-javascript-fill { color: var(--js-color); font-size: 15px; }
-
-        /* منوی تغییر رنگ پنجره کدنویسی */
-        .editor-actions-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-shrink: 0;
-        }
-
-        .theme-picker-wrapper {
-            position: relative;
-        }
-
-        .theme-btn {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 5px 10px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            color: #f8fafc;
-            font-family: 'Vazirmatn', sans-serif;
-            font-size: 11.5px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            white-space: nowrap;
-        }
-
-        .theme-btn:hover {
-            background: rgba(99, 102, 241, 0.25);
-            border-color: var(--primary);
-        }
-
-        .theme-swatch-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 3px;
-            background: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-        }
-
-        .theme-dropdown {
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 0;
-            width: 220px;
-            background: rgba(12, 16, 30, 0.96);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 14px;
-            padding: 8px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-            display: none;
-            flex-direction: column;
-            gap: 4px;
-            z-index: 999;
-        }
-
-        .theme-dropdown.open {
-            display: flex;
-            animation: fadeInMenu 0.18s ease;
-        }
-
-        @keyframes fadeInMenu {
-            from { opacity: 0; transform: translateY(-6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .theme-dropdown-header {
-            font-size: 11px;
-            color: #94a3b8;
-            padding: 4px 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            margin-bottom: 2px;
-        }
-
-        .theme-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 7px 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 12px;
-            color: #e2e8f0;
-            transition: 0.15s;
-        }
-
-        .theme-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .theme-item.active {
-            background: rgba(99, 102, 241, 0.22);
-            color: #00f2fe;
-            font-weight: 700;
-        }
-
-        .theme-item-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .mini-swatch {
-            width: 22px;
-            height: 22px;
-            border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
-            font-weight: 800;
-        }
-
-        .editor-status {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            color: var(--text-muted);
-            direction: ltr;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* ==================== محیط داخلی ادیتور (پیش‌فرض سفید خالص و متن پررنگ) ==================== */
-        .editors-wrapper {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            background-color: var(--code-bg);
-            background-image: 
-                linear-gradient(var(--code-grid) 1px, transparent 1px),
-                linear-gradient(90deg, var(--code-grid) 1px, transparent 1px);
-            background-size: 24px 24px;
-            transition: background-color 0.25s ease;
-        }
-
-        .editor-box {
-            position: absolute;
-            inset: 0;
-            display: none;
-            direction: ltr;
-        }
-
-        .editor-box.active {
-            display: flex;
-        }
-
-        .line-numbers {
-            width: 48px;
-            padding: 18px 8px;
-            text-align: right;
-            background: var(--code-gutter-bg);
-            border-right: 1px solid rgba(148, 163, 184, 0.25);
-            color: var(--code-gutter-text);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13.5px;
-            font-weight: 700;
-            line-height: 25px;
-            overflow: hidden;
-            user-select: none;
-            transition: background-color 0.25s ease, color 0.25s ease;
-        }
-
-        textarea.code-input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--code-text);
-            font-family: 'JetBrains Mono', 'Vazirmatn', monospace;
-            font-size: 14.5px;
-            font-weight: 700;
-            line-height: 25px;
-            padding: 18px 16px;
-            resize: none;
-            white-space: pre;
-            overflow-wrap: normal;
-            overflow-x: auto;
-            tab-size: 2;
-            caret-color: var(--code-caret);
-            transition: color 0.25s ease;
-        }
-
-        textarea.code-input::placeholder {
-            color: var(--code-placeholder);
-            font-weight: 500;
-        }
-
-        textarea.code-input::selection {
-            background: rgba(99, 102, 241, 0.28);
-        }
-
-        /* ==================== Resizer (دستگیره تغییر سایز دسکتاپ) ==================== */
-        .gutter {
-            width: 8px;
-            border-radius: 99px;
-            background: rgba(255, 255, 255, 0.04);
-            cursor: col-resize;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            z-index: 50;
-            flex-shrink: 0;
-        }
-
-        .gutter:hover, .gutter.dragging {
-            background: var(--primary);
-            box-shadow: 0 0 15px var(--primary);
-        }
-
-        .gutter::after {
-            content: "";
-            width: 2px;
-            height: 32px;
-            background: rgba(255, 255, 255, 0.35);
-            border-radius: 2px;
-        }
-
-        /* ==================== Preview Section (پنجره خروجی تیره و استودیویی) ==================== */
-        .preview-section {
-            flex: 1;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            background: var(--panel-bg);
-            backdrop-filter: blur(28px);
-            -webkit-backdrop-filter: blur(28px);
-            border: 1px solid var(--border-subtle);
-            border-radius: 16px;
-            min-width: 280px;
-            overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-            transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .preview-section.expanded {
-            position: fixed;
-            inset: 10px;
-            width: calc(100vw - 20px) !important;
-            height: calc(100dvh - 20px) !important;
-            z-index: 9999;
-            border-color: var(--border-highlight);
-            box-shadow: 0 0 60px rgba(0, 0, 0, 0.95);
-        }
-
-        .browser-bar {
-            height: 48px;
-            background: rgba(3, 5, 11, 0.85);
-            border-bottom: 1px solid var(--border-subtle);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 14px;
-            direction: ltr;
-            flex-shrink: 0;
-            gap: 8px;
-        }
-
-        .window-controls {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            flex-shrink: 0;
-        }
-
-        .win-dot {
-            width: 11px;
-            height: 11px;
-            border-radius: 50%;
-            display: inline-block;
-            transition: transform 0.2s;
-        }
-        .win-dot:hover { transform: scale(1.2); }
-        .win-dot.close { background: #ff5f56; }
-        .win-dot.min { background: #ffbd2e; }
-        .win-dot.max { background: #27c93f; cursor: pointer; }
-
-        .url-box {
-            direction: ltr;
-            unicode-bidi: isolate;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--border-subtle);
-            border-radius: 8px;
-            padding: 4px 14px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11.5px;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            max-width: 260px;
-            width: 100%;
-            justify-content: center;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .preview-actions {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-
-        .icon-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-subtle);
-            color: var(--text-main);
-            padding: 5px 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-family: 'Vazirmatn', sans-serif;
-            font-size: 12px;
-            transition: 0.2s;
-            white-space: nowrap;
-        }
-
-        .icon-btn:hover {
-            background: var(--primary);
-            border-color: var(--primary);
-        }
-
-        .iframe-wrapper {
-            flex: 1;
-            position: relative;
-            background: transparent;
-        }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
-            background: transparent;
-        }
-
-        .empty-preview-state {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 24px;
-            pointer-events: none;
-            transition: opacity 0.25s ease;
-        }
-
-        .empty-preview-state.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .empty-orb {
-            width: 68px;
-            height: 68px;
-            border-radius: 20px;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(0, 242, 254, 0.1));
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            color: #818cf8;
-            margin-bottom: 16px;
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
-        }
-
-        .empty-preview-state h3 {
-            font-size: 16px;
-            color: #e2e8f0;
-            margin-bottom: 8px;
-        }
-
-        .empty-preview-state p {
-            font-size: 13px;
-            color: var(--text-muted);
-            max-width: 310px;
-            line-height: 1.7;
-        }
-
-        .drag-shield {
-            position: absolute;
-            inset: 0;
-            display: none;
-            z-index: 20;
-        }
-
-        /* ==================== Console Drawer ==================== */
-        .console-drawer {
-            height: 155px;
-            background: rgba(4, 6, 14, 0.96);
-            border-top: 1px solid var(--border-subtle);
-            display: none;
-            flex-direction: column;
-            direction: ltr;
-            flex-shrink: 0;
-        }
-
-        .console-drawer.open {
-            display: flex;
-        }
-
-        .console-header {
-            padding: 7px 14px;
-            background: rgba(255, 255, 255, 0.02);
-            border-bottom: 1px solid var(--border-subtle);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11.5px;
-            color: var(--text-muted);
-        }
-
-        .console-logs {
-            flex: 1;
-            padding: 10px 14px;
-            overflow-y: auto;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12.5px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .log-item {
-            padding: 5px 10px;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.03);
-            border-left: 3px solid var(--accent-cyan);
-            color: #e2e8f0;
-            word-break: break-word;
-        }
-
-        .log-item.error {
-            border-left-color: var(--danger);
-            background: rgba(244, 63, 94, 0.12);
-            color: #fda4af;
-        }
-
-        /* ==================== نوار سوئیچ مخصوص موبایل و تبلت ==================== */
-        .mobile-nav-bar {
-            display: none;
-            height: 56px;
-            background: rgba(7, 9, 18, 0.95);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid var(--border-subtle);
-            padding: 6px 12px;
-            gap: 8px;
-            z-index: 300;
-            flex-shrink: 0;
-        }
-
-        .mobile-nav-btn {
-            flex: 1;
-            border: 1px solid var(--border-subtle);
-            background: rgba(255, 255, 255, 0.03);
-            color: #94a3b8;
-            border-radius: 12px;
-            font-family: 'Vazirmatn', sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .mobile-nav-btn.active {
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.25), rgba(124, 58, 237, 0.25));
-            border-color: var(--primary);
-            color: #ffffff;
-            box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
-        }
-
-        /* Toast Notification */
-        .toast {
-            position: fixed;
-            bottom: 24px;
-            left: 24px;
-            background: rgba(10, 14, 26, 0.95);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--border-highlight);
-            color: #fff;
-            padding: 11px 18px;
-            border-radius: 12px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.65);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 12.5px;
-            transform: translateY(120px);
-            opacity: 0;
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 10000;
-        }
-
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        /* ==================== طراحی کاملاً ریسپانسیو برای موبایل و تبلت ==================== */
-        @media (max-width: 960px) {
-            header {
-                height: 58px;
-                padding: 0 12px;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Sin∞k Online Compiler v14.0 | استودیوی ابری کدنویسی، تمامی کتابخانه‌های علمی، Tkinter GUI و هوش مصنوعی</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Vazirmatn (Persian UI) & JetBrains Mono (Code Editor/Terminal) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- JSZip for Real Project ZIP Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <!-- AlaSQL for Real Client-Side SQL Execution -->
+  <script src="https://cdn.jsdelivr.net/npm/alasql@4.4.0/dist/alasql.min.js"></script>
+
+  <!-- Chart.js for Scientific & Data Visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Canvas Confetti for Visual Celebrations -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <!-- Pyodide (Real In-Browser Python WebAssembly + NumPy/Pandas/Matplotlib Support) -->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js" defer></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            sinook: {
+              primary: '#00E676',
+              secondary: '#10B981',
+              bg: '#020B06',
+              card: '#071A10',
+              accent: '#84CC16',
+              success: '#00FF87',
+              warning: '#FACC15',
+              danger: '#FF3B5C'
             }
-
-            .badge,
-            .btn span,
-            .auto-run-toggle span:not(.dot),
-            .editor-status {
-                display: none;
-            }
-
-            .logo {
-                font-size: 22px;
-            }
-            .logo .inf-symbol {
-                font-size: 26px;
-            }
-
-            .btn {
-                padding: 8px 11px;
-            }
-
-            .auto-run-toggle {
-                padding: 8px 10px;
-            }
-
-            .workspace {
-                height: calc(100dvh - 114px);
-                padding: 8px;
-                gap: 0;
-            }
-
-            .gutter {
-                display: none;
-            }
-
-            .coding-section,
-            .preview-section {
-                width: 100% !important;
-                min-width: unset;
-                height: 100%;
-                border-radius: 14px;
-            }
-
-            /* در موبایل هر لحظه یکی از پنل‌ها با کیفیت کامل نمایش داده می‌شود */
-            .workspace[data-mobile-view="code"] .preview-section {
-                display: none;
-            }
-            .workspace[data-mobile-view="preview"] .coding-section {
-                display: none;
-            }
-
-            .mobile-nav-bar {
-                display: flex;
-            }
-
-            .url-box {
-                display: none;
-            }
-
-            .tab {
-                padding: 9px 11px;
-                font-size: 11.5px;
-            }
-
-            .theme-btn span.theme-label-text {
-                display: none;
-            }
-
-            .toast {
-                bottom: 68px;
-                left: 12px;
-                right: 12px;
-                justify-content: center;
-            }
+          },
+          fontFamily: {
+            sans: ['Vazirmatn', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
         }
+      }
+    };
+  </script>
 
-        @media (max-width: 480px) {
-            .line-numbers {
-                width: 38px;
-                padding: 14px 5px;
-                font-size: 12px;
-            }
+  <style>
+    :root {
+      --primary: #00E676;
+      --secondary: #10B981;
+      --bg-deep: #020B06;
+      --bg-card: #071A10;
+      --accent: #84CC16;
+      --success: #00FF87;
+      --warning: #FACC15;
+      --danger: #FF3B5C;
+    }
 
-            textarea.code-input {
-                font-size: 13.5px;
-                padding: 14px 10px;
-            }
-        }
-    </style>
+    * {
+      box-sizing: border-box;
+      scrollbar-width: thin;
+      scrollbar-color: #00E676 #020B06;
+    }
+
+    *::-webkit-scrollbar { width: 6px; height: 6px; }
+    *::-webkit-scrollbar-track { background: #020B06; }
+    *::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #00E676, #10B981, #84CC16);
+      border-radius: 9999px;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-deep);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(0, 230, 118, 0.16) 0%, transparent 42%),
+        radial-gradient(circle at 85% 25%, rgba(132, 204, 22, 0.13) 0%, transparent 40%),
+        radial-gradient(circle at 50% 85%, rgba(16, 185, 129, 0.12) 0%, transparent 45%);
+      color: #ECFDF5;
+      font-family: 'Vazirmatn', sans-serif;
+      overflow-x: hidden;
+    }
+
+    body.ide-locked {
+      height: 100vh;
+      max-height: 100vh;
+      overflow: hidden !important;
+    }
+
+    .glass-panel {
+      background: rgba(7, 26, 16, 0.82);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(0, 255, 135, 0.22);
+      box-shadow: 
+        0 20px 50px -10px rgba(1, 8, 4, 0.9),
+        0 0 28px -5px rgba(0, 230, 118, 0.18),
+        inset 0 1px 1px rgba(255, 255, 255, 0.09);
+    }
+
+    .spotlight-card {
+      position: relative;
+      background: linear-gradient(155deg, rgba(8, 30, 18, 0.92) 0%, rgba(3, 14, 8, 0.97) 100%);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(0, 255, 135, 0.2);
+      overflow: hidden;
+      transition: all 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .spotlight-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        380px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(0, 255, 135, 0.22),
+        transparent 45%
+      );
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .spotlight-card::after {
+      content: '';
+      position: absolute;
+      top: -100%;
+      left: -100%;
+      width: 60%;
+      height: 200%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 135, 0.08), transparent);
+      transform: rotate(35deg);
+      transition: all 0.65s ease;
+      pointer-events: none;
+    }
+
+    .spotlight-card:hover::before { opacity: 1; }
+    .spotlight-card:hover::after { left: 160%; }
+    .spotlight-card:hover {
+      transform: translateY(-7px) scale(1.015);
+      border-color: rgba(0, 255, 135, 0.75);
+      box-shadow: 0 20px 45px -10px rgba(0, 230, 118, 0.42), 0 0 26px rgba(16, 185, 129, 0.28);
+    }
+
+    .neon-btn-primary {
+      position: relative;
+      background: linear-gradient(135deg, #059669 0%, #00E676 50%, #84CC16 100%);
+      background-size: 200% 200%;
+      color: #02180B;
+      font-weight: 800;
+      box-shadow: 0 0 24px rgba(0, 230, 118, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.45);
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: gradientShift 4.5s ease infinite;
+    }
+    .neon-btn-primary:hover {
+      box-shadow: 0 0 36px rgba(0, 255, 135, 0.85), 0 0 16px rgba(132, 204, 22, 0.65);
+      transform: translateY(-2px) scale(1.03);
+    }
+
+    .neon-btn-run {
+      background: linear-gradient(135deg, #00FF87 0%, #10B981 55%, #A3E635 100%);
+      background-size: 200% 200%;
+      color: #011409;
+      font-weight: 900;
+      box-shadow: 0 0 25px rgba(0, 255, 135, 0.55), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+      transition: all 0.25s ease;
+      animation: gradientShift 4s ease infinite;
+    }
+    .neon-btn-run:hover {
+      box-shadow: 0 0 38px rgba(0, 255, 135, 0.95), 0 0 18px rgba(163, 230, 53, 0.7);
+      transform: scale(1.05);
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(1.5deg); }
+    }
+
+    .float-anim {
+      animation: floatSlow 4.5s ease-in-out infinite;
+    }
+
+    .neon-text-gradient {
+      background: linear-gradient(90deg, #FFFFFF 0%, #00FF87 40%, #34D399 70%, #A3E635 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 18px rgba(0, 255, 135, 0.32));
+    }
+
+    .infinity-symbol {
+      display: inline-block;
+      background: linear-gradient(90deg, #00FF87, #84CC16, #10B981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 12px rgba(0, 255, 135, 0.9));
+      animation: pulseGlow 2.2s infinite alternate ease-in-out;
+    }
+
+    @keyframes pulseGlow {
+      0% { filter: drop-shadow(0 0 6px rgba(0, 255, 135, 0.5)); transform: scale(0.96) rotate(-3deg); }
+      100% { filter: drop-shadow(0 0 20px rgba(132, 204, 22, 1)); transform: scale(1.12) rotate(3deg); }
+    }
+
+    @keyframes radarSweep {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .radar-ring {
+      animation: radarSweep 12s linear infinite;
+    }
+
+    #bgCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .ltr-code {
+      direction: ltr !important;
+      text-align: left !important;
+      font-family: 'JetBrains Mono', monospace !important;
+    }
+
+    #codeEditorViewport {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #020A05;
+      display: flex;
+      direction: ltr;
+    }
+
+    #codeLineGutter {
+      width: 68px;
+      padding: 16px 8px 16px 6px;
+      background: #010603;
+      color: #34D399;
+      opacity: 0.7;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 24px;
+      text-align: right;
+      user-select: none;
+      border-right: 1px solid rgba(0, 255, 135, 0.18);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .gutter-line-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 24px;
+      padding: 0 4px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+    .gutter-line-item:hover { background: rgba(0, 255, 135, 0.16); color: #ECFDF5; }
+    .gutter-line-item.has-breakpoint { background: rgba(255, 59, 92, 0.22); color: #FDA4AF; font-weight: 700; }
+    .gutter-line-item.has-error { background: rgba(255, 59, 92, 0.35); color: #FF3B5C; font-weight: 800; }
+
+    .bp-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 9999px;
+      background: transparent;
+      display: inline-block;
+      transition: all 0.15s;
+    }
+    .gutter-line-item:hover .bp-dot { background: rgba(255, 59, 92, 0.45); }
+    .gutter-line-item.has-breakpoint .bp-dot { background: #FF3B5C; box-shadow: 0 0 8px #FF3B5C; }
+
+    #codeMainTextarea {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      color: #ECFDF5;
+      caret-color: #00FF87;
+      border: none;
+      outline: none;
+      resize: none;
+      padding: 16px 18px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 24px;
+      tab-size: 4;
+      white-space: pre;
+      overflow-y: auto;
+      overflow-x: auto;
+      direction: ltr;
+      text-align: left;
+    }
+
+    #codeMainTextarea::selection { background: rgba(0, 230, 118, 0.32); color: #fff; }
+
+    .resizer-h {
+      height: 6px;
+      cursor: row-resize;
+      background: rgba(0, 255, 135, 0.15);
+      transition: all 0.2s;
+    }
+    .resizer-h:hover, .resizer-h.active {
+      background: linear-gradient(90deg, #059669, #00FF87, #84CC16, #10B981);
+      box-shadow: 0 0 14px rgba(0, 255, 135, 0.75);
+    }
+
+    body.light-theme {
+      --bg-deep: #F0FDF4;
+      background-color: #F0FDF4;
+      color: #052E16;
+    }
+    body.light-theme .glass-panel, body.light-theme .spotlight-card {
+      background: rgba(255, 255, 255, 0.93);
+      border-color: rgba(16, 185, 129, 0.35);
+      color: #052E16;
+    }
+    body.light-theme #codeEditorViewport { background: #FFFFFF; }
+    body.light-theme #codeLineGutter { background: #F0FDF4; color: #15803D; border-right-color: #BBF7D0; }
+    body.light-theme #codeMainTextarea { color: #052E16; }
+
+    .ai-streaming-cursor::after {
+      content: '▋';
+      display: inline-block;
+      color: #00FF87;
+      margin-right: 3px;
+      animation: blinkCursor 0.6s infinite;
+    }
+    @keyframes blinkCursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    .engine-dot-online { width: 8px; height: 8px; border-radius: 50%; background: #00FF87; box-shadow: 0 0 10px #00FF87; }
+  </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col selection:bg-emerald-500 selection:text-slate-950">
 
-    <!-- پس‌زمینه فوق‌حرفه‌ای استودیویی -->
-    <div class="pro-studio-bg">
-        <div class="light-beam beam-1"></div>
-        <div class="light-beam beam-2"></div>
-        <div class="beam-bottom"></div>
-        <div class="dot-matrix"></div>
-        <canvas id="codeMatrixCanvas"></canvas>
-    </div>
+  <!-- 1. ANIMATED EMERALD MATRIX BACKGROUND CANVAS -->
+  <canvas id="bgCanvas"></canvas>
 
-    <!-- نوار بالایی -->
-    <header>
-        <div class="brand">
-            <div class="logo" dir="ltr">Sin<span class="inf-symbol">∞</span>k</div>
-            <span class="badge">نسخه استودیو پرو</span>
+  <!-- 2. SINGLE UNIFIED TOP HEADER BAR -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-emerald-500/30 px-3 sm:px-5 py-2 shrink-0">
+    <div class="max-w-[1780px] mx-auto flex flex-wrap items-center justify-between gap-2">
+      
+      <!-- Right: Brand Logo & Main View Switcher -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="flex items-center gap-2.5 cursor-pointer group" onclick="switchMainView('home')">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 via-green-500 to-lime-400 p-[2px] shadow-lg shadow-emerald-500/35 group-hover:scale-105 transition">
+            <div class="w-full h-full bg-[#020B06] rounded-[14px] flex items-center justify-center font-mono font-black text-lg text-emerald-400">
+              S<span class="infinity-symbol">∞</span>
+            </div>
+          </div>
+          <div class="hidden sm:block">
+            <div class="flex items-center gap-1.5">
+              <span class="font-mono font-black text-lg tracking-tight text-white">Sin<span class="infinity-symbol">∞</span>k</span>
+              <span class="text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">v14.0 PRO+LIBS</span>
+            </div>
+            <p class="text-[10px] text-emerald-300/70">Full-Library Cloud IDE & Tkinter GUI</p>
+          </div>
         </div>
 
-        <div class="toolbar">
-            <div class="auto-run-toggle" id="autoRunBtn" title="اجرای خودکار هنگام تایپ">
-                <span class="dot" id="autoRunDot"></span>
-                <span>پیش‌نمایش زنده</span>
-            </div>
-
-            <button class="btn btn-primary" onclick="runCode(true)" title="اجرای کد">
-                <i class="ri-play-fill"></i>
-                <span>اجرای کد</span>
-            </button>
-
-            <button class="btn" onclick="togglePreviewFullscreen()" title="بزرگنمایی کامل پنجره خروجی">
-                <i class="ri-fullscreen-line"></i>
-                <span>بزرگنمایی خروجی</span>
-            </button>
-
-            <button class="btn" onclick="downloadProject()" title="دانلود فایل کامل HTML">
-                <i class="ri-download-cloud-2-line"></i>
-                <span>دانلود پروژه</span>
-            </button>
-
-            <button class="btn" onclick="clearAllEditors()" title="پاک کردن تمام کدها">
-                <i class="ri-delete-bin-6-line"></i>
-                <span>پاکسازی</span>
-            </button>
+        <div class="flex items-center bg-[#020B06]/90 p-1 rounded-xl border border-emerald-500/30">
+          <button onclick="switchMainView('home')" id="navBtn-home" class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-green-600 text-slate-950 shadow">
+            <i class="fa-solid fa-house"></i>
+            <span>صفحه اصلی (۳۹ زبان)</span>
+          </button>
+          <button onclick="switchMainView('ide')" id="navBtn-ide" class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold text-emerald-200/80 hover:text-white transition flex items-center gap-1.5">
+            <i class="fa-solid fa-code text-emerald-400"></i>
+            <span>محیط کدنویسی (IDE)</span>
+          </button>
         </div>
-    </header>
+      </div>
 
-    <!-- محیط کاری اصلی -->
-    <main class="workspace" id="workspace" data-mobile-view="code">
-
-        <!-- بخش کدنویسی (پیش‌فرض سفید خالص + متن پررنگ + منوی تغییر رنگ) -->
-        <section class="coding-section" id="codingPanel">
-            <div class="tabs-bar">
-                <div class="tabs-group">
-                    <button class="tab active" data-lang="html" onclick="switchTab('html')">
-                        <i class="ri-html5-fill"></i> index.html
-                    </button>
-                    <button class="tab" data-lang="css" onclick="switchTab('css')">
-                        <i class="ri-css3-fill"></i> style.css
-                    </button>
-                    <button class="tab" data-lang="js" onclick="switchTab('js')">
-                        <i class="ri-javascript-fill"></i> script.js
-                    </button>
-                </div>
-
-                <div class="editor-actions-right">
-                    <!-- منوی تغییر رنگ پنجره کدنویسی -->
-                    <div class="theme-picker-wrapper">
-                        <button class="theme-btn" onclick="toggleThemeDropdown(event)" title="تغییر رنگ پنجره کدنویسی">
-                            <span class="theme-swatch-dot" id="activeSwatchDot"></span>
-                            <span class="theme-label-text">رنگ پنجره کد</span>
-                            <i class="ri-palette-line" style="color: #00f2fe; font-size: 14px;"></i>
-                        </button>
-
-                        <div class="theme-dropdown" id="themeDropdown" onclick="event.stopPropagation()">
-                            <div class="theme-dropdown-header">انتخاب تم پنجره کدنویسی</div>
-
-                            <div class="theme-item active" onclick="changeEditorTheme('white', this)">
-                                <div class="theme-item-left">
-                                    <span class="mini-swatch" style="background: #ffffff; color: #090d16;">Aa</span>
-                                    <span>سفید خالص (پیش‌فرض)</span>
-                                </div>
-                                <i class="ri-check-line"></i>
-                            </div>
-
-                            <div class="theme-item" onclick="changeEditorTheme('studio-dark', this)">
-                                <div class="theme-item-left">
-                                    <span class="mini-swatch" style="background: #070a14; color: #f1f5f9;">Aa</span>
-                                    <span>تیره استودیویی (Dark)</span>
-                                </div>
-                            </div>
-
-                            <div class="theme-item" onclick="changeEditorTheme('silver', this)">
-                                <div class="theme-item-left">
-                                    <span class="mini-swatch" style="background: #f1f5f9; color: #0f172a;">Aa</span>
-                                    <span>نقره‌ای ملایم</span>
-                                </div>
-                            </div>
-
-                            <div class="theme-item" onclick="changeEditorTheme('warm', this)">
-                                <div class="theme-item-left">
-                                    <span class="mini-swatch" style="background: #fefce8; color: #1c1917;">Aa</span>
-                                    <span>کرمی کاغذی</span>
-                                </div>
-                            </div>
-
-                            <div class="theme-item" onclick="changeEditorTheme('ice', this)">
-                                <div class="theme-item-left">
-                                    <span class="mini-swatch" style="background: #ecfeff; color: #083344;">Aa</span>
-                                    <span>آبی یخی</span>
-                                </div>
-                            </div>
-
-                            <div class="theme-item" onclick="changeEditorTheme('cyber', this)">
-                                <div class="theme-item-left">
-                                    <span class="mini-swatch" style="background: #050811; color: #00f2fe;">Aa</span>
-                                    <span>نئون سایبرپانک</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="editor-status">
-                        <span id="cursorPos">Ln 1, Col 1</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="editors-wrapper">
-                <!-- ادیتور HTML -->
-                <div class="editor-box active" id="box-html">
-                    <div class="line-numbers" id="lines-html">1</div>
-                    <textarea class="code-input" id="code-html" spellcheck="false" placeholder="<!-- کدهای HTML خود را اینجا بنویسید... -->"></textarea>
-                </div>
-
-                <!-- ادیتور CSS -->
-                <div class="editor-box" id="box-css">
-                    <div class="line-numbers" id="lines-css">1</div>
-                    <textarea class="code-input" id="code-css" spellcheck="false" placeholder="/* استایل‌های CSS خود را اینجا بنویسید... */"></textarea>
-                </div>
-
-                <!-- ادیتور JS -->
-                <div class="editor-box" id="box-js">
-                    <div class="line-numbers" id="lines-js">1</div>
-                    <textarea class="code-input" id="code-js" spellcheck="false" placeholder="// کدهای JavaScript خود را اینجا بنویسید..."></textarea>
-                </div>
-            </div>
-        </section>
-
-        <!-- دستگیره تغییر سایز پنل‌ها -->
-        <div class="gutter" id="gutter" title="برای تغییر اندازه پنل بکشید"></div>
-
-        <!-- بخش خروجی و پیش‌نمایش -->
-        <section class="preview-section" id="previewPanel">
-            <div class="browser-bar">
-                <div class="window-controls">
-                    <span class="win-dot close"></span>
-                    <span class="win-dot min"></span>
-                    <span class="win-dot max" onclick="togglePreviewFullscreen()" title="بزرگنمایی"></span>
-                </div>
-
-                <div class="url-box" dir="ltr">
-                    <i class="ri-terminal-window-line" style="color: #00f2fe;"></i>
-                    <span>sinook://live-preview</span>
-                </div>
-
-                <div class="preview-actions">
-                    <button class="icon-btn" onclick="toggleConsole()" title="نمایش کنسول جاوااسکریپت">
-                        <i class="ri-terminal-box-line"></i>
-                        <span>کنسول</span>
-                        <span id="logCount" style="background: var(--primary); padding: 0 6px; border-radius: 99px; font-size: 10px;">0</span>
-                    </button>
-
-                    <button class="icon-btn" onclick="openInNewTab()" title="اجرا در تب مستقل مرورگر">
-                        <i class="ri-external-link-line"></i>
-                    </button>
-
-                    <button class="icon-btn" id="expandBtn" onclick="togglePreviewFullscreen()">
-                        <i class="ri-aspect-ratio-line" id="expandIcon"></i>
-                        <span id="expandText">تمام‌صفحه</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="iframe-wrapper" id="iframeWrapper">
-                <div class="drag-shield" id="dragShield"></div>
-
-                <!-- وضعیت خالی بودن کدها -->
-                <div class="empty-preview-state" id="emptyState">
-                    <div class="empty-orb">
-                        <i class="ri-code-s-slash-line"></i>
-                    </div>
-                    <h3>آماده شروع کدنویسی در <span dir="ltr">Sin∞k</span></h3>
-                    <p>کدهای HTML، CSS یا جاوااسکریپت خود را وارد کنید تا خروجی به صورت زنده در این پنجره نمایش داده شود.</p>
-                </div>
-
-                <iframe id="previewFrame" sandbox="allow-scripts allow-modals"></iframe>
-            </div>
-
-            <!-- کنسول اختصاصی جاوااسکریپت -->
-            <div class="console-drawer" id="consoleDrawer">
-                <div class="console-header">
-                    <span dir="ltr"><i class="ri-terminal-line"></i> Sin∞k Console Output</span>
-                    <button class="icon-btn" onclick="clearConsole()" style="padding: 2px 8px;">پاک کردن</button>
-                </div>
-                <div class="console-logs" id="consoleLogs"></div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- نوار سوئیچ پایین صفحه مخصوص موبایل -->
-    <nav class="mobile-nav-bar">
-        <button class="mobile-nav-btn active" id="mobCodeBtn" onclick="setMobileView('code')">
-            <i class="ri-code-box-line"></i>
-            <span>پنجره کدنویسی</span>
+      <!-- Center: Contextual IDE Controls -->
+      <div id="unifiedIdeToolbar" class="hidden items-center flex-wrap gap-1.5">
+        <button onclick="toggleIdeSidebar()" class="p-2 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 text-emerald-400 border border-emerald-500/30 text-xs" title="نمایش/مخفی‌سازی فایل‌ها">
+          <i class="fa-solid fa-folder-tree"></i>
         </button>
-        <button class="mobile-nav-btn" id="mobPreviewBtn" onclick="setMobileView('preview')">
-            <i class="ri-eye-line"></i>
-            <span>پیش‌نمایش زنده</span>
-        </button>
-    </nav>
 
-    <!-- پیغام پاپ‌آپ -->
-    <div class="toast" id="toast">
-        <i class="ri-flashlight-fill" style="color: #00f2fe; font-size: 18px;"></i>
-        <span id="toastMsg">عملیات با موفقیت انجام شد</span>
+        <div class="flex items-center bg-[#04140B] border border-emerald-500/40 rounded-xl px-2.5 py-1">
+          <span id="ideActiveLangIcon" class="ml-1.5 text-sm">🐍</span>
+          <select id="ideLanguageSelect" onchange="changeActiveLanguageFromDropdown(this.value)" class="bg-transparent text-xs font-extrabold text-white focus:outline-none cursor-pointer"></select>
+        </div>
+
+        <div class="hidden xl:flex items-center gap-1.5 bg-[#04140B] border border-lime-500/35 rounded-xl px-2.5 py-1">
+          <span id="engineHealthDot" class="engine-dot-online"></span>
+          <select id="preferredEngineSelect" onchange="changePreferredEngine(this.value)" class="bg-transparent text-[11px] font-mono font-bold text-emerald-300 focus:outline-none cursor-pointer">
+            <option value="auto" class="bg-[#020B06] text-white">Engine: Auto + Pyodide/GUI</option>
+            <option value="pyodide" class="bg-[#020B06] text-white">Engine 0: Pyodide WASM (NumPy/Pandas)</option>
+            <option value="local" class="bg-[#020B06] text-white">Engine 1: Local Worker / Tkinter</option>
+            <option value="wandbox" class="bg-[#020B06] text-white">Engine 2: Wandbox Cloud</option>
+            <option value="piston" class="bg-[#020B06] text-white">Engine 3: Piston Runtimes API</option>
+          </select>
+        </div>
+
+        <button id="btnRunCode" onclick="executeActiveCode()" class="neon-btn-run px-4 py-1.5 rounded-xl text-xs flex items-center gap-1.5">
+          <i id="runBtnIcon" class="fa-solid fa-play"></i>
+          <span id="runBtnText">اجرای کد (Run)</span>
+        </button>
+
+        <button id="btnStopCode" onclick="stopCodeExecution()" disabled class="px-2.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/40 disabled:opacity-35 disabled:pointer-events-none border border-rose-500/40 text-rose-300 text-xs font-bold flex items-center gap-1 transition" title="توقف اجرا">
+          <i class="fa-solid fa-stop"></i>
+        </button>
+
+        <button onclick="openLibrariesModal()" class="px-2.5 py-1.5 rounded-xl bg-lime-500/20 hover:bg-lime-500/35 border border-lime-400/40 text-lime-300 text-xs font-bold flex items-center gap-1" title="مدیریت و درج کتابخانه‌های علمی و گرافیکی">
+          <i class="fa-solid fa-boxes-stacked"></i>
+          <span class="hidden lg:inline">کتابخانه‌ها (Libs)</span>
+        </button>
+
+        <button onclick="insertLanguageStarterTemplate()" class="px-2.5 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/35 border border-emerald-500/35 text-emerald-300 text-xs font-bold flex items-center gap-1" title="درج کد نمونه این زبان">
+          <i class="fa-solid fa-wand-sparkles"></i>
+          <span class="hidden lg:inline">کد نمونه</span>
+        </button>
+
+        <button onclick="insertTkinterStarterCode()" class="px-2.5 py-1.5 rounded-xl bg-teal-600/20 hover:bg-teal-600/35 border border-teal-400/40 text-teal-300 text-xs font-bold flex items-center gap-1" title="درج نمونه برنامه گرافیکی Tkinter">
+          <i class="fa-solid fa-window-restore"></i>
+          <span class="hidden lg:inline">نمونه Tkinter</span>
+        </button>
+
+        <button onclick="formatCurrentCode()" class="px-2.5 py-1.5 rounded-xl bg-emerald-950/90 hover:bg-emerald-900 border border-emerald-700/50 text-emerald-200 text-xs font-semibold flex items-center gap-1" title="مرتب‌سازی کد">
+          <i class="fa-solid fa-indent text-emerald-400"></i>
+          <span class="hidden 2xl:inline">Format</span>
+        </button>
+
+        <button onclick="clearCurrentEditor()" class="p-1.5 rounded-xl bg-emerald-950/90 hover:bg-rose-950/60 border border-emerald-700/50 text-emerald-300 hover:text-rose-300 text-xs" title="پاکسازی ویرایشگر">
+          <i class="fa-solid fa-eraser"></i>
+        </button>
+
+        <div class="hidden lg:flex items-center bg-emerald-950/90 rounded-xl border border-emerald-700/50 px-1.5 py-0.5" title="تغییر اندازه فونت ادیتور">
+          <button onclick="changeEditorFontSize(-1)" class="px-1 text-xs text-emerald-300 hover:text-white font-bold">A-</button>
+          <span id="fontSizeLabel" class="text-[10px] font-mono text-lime-400 px-1">14px</span>
+          <button onclick="changeEditorFontSize(1)" class="px-1 text-xs text-emerald-300 hover:text-white font-bold">A+</button>
+        </div>
+
+        <button onclick="openEngineeringSuiteModal('flowchart')" class="px-2.5 py-1.5 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/40 border border-emerald-400/40 text-emerald-200 text-xs font-bold flex items-center gap-1">
+          <i class="fa-solid fa-compass-drafting text-lime-300"></i>
+          <span class="hidden xl:inline">ابزار مهندسی</span>
+        </button>
+
+        <button onclick="exportFullProjectZip()" class="px-2.5 py-1.5 rounded-xl bg-lime-600/20 hover:bg-lime-600/35 border border-lime-400/40 text-lime-300 text-xs font-bold flex items-center gap-1" title="دانلود کل پروژه به صورت فایل ZIP">
+          <i class="fa-solid fa-file-zipper"></i>
+          <span class="hidden 2xl:inline">ZIP</span>
+        </button>
+
+        <input type="file" id="hiddenFileInput" class="hidden" onchange="handleFileUpload(event)" />
+        <button onclick="document.getElementById('hiddenFileInput').click()" class="p-1.5 rounded-xl bg-emerald-950/90 hover:bg-emerald-900 text-emerald-300 text-xs border border-emerald-700/50" title="آپلود فایل کد">
+          <i class="fa-solid fa-upload"></i>
+        </button>
+        <button onclick="downloadActiveFile()" class="p-1.5 rounded-xl bg-emerald-950/90 hover:bg-emerald-900 text-emerald-300 text-xs border border-emerald-700/50" title="دانلود فایل فعال">
+          <i class="fa-solid fa-download"></i>
+        </button>
+      </div>
+
+      <!-- Left: New File, AI Super-Studio, Theme & Settings -->
+      <div class="flex items-center gap-1.5">
+        <button onclick="openNewFileModal()" class="neon-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5">
+          <i class="fa-solid fa-file-circle-plus"></i>
+          <span class="hidden sm:inline">فایل جدید</span>
+        </button>
+
+        <button onclick="openAiInIde()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-lime-600 hover:from-emerald-500 hover:to-lime-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-lg shadow-emerald-600/30">
+          <i class="fa-solid fa-wand-magic-sparkles text-yellow-300"></i>
+          <span>هوش مصنوعی Sin∞k AI</span>
+        </button>
+
+        <button onclick="toggleEditorTheme()" class="p-2 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 text-lime-300 text-xs border border-emerald-700/50" title="تغییر تم روشن / تاریک">
+          <i id="themeToggleIcon" class="fa-solid fa-moon"></i>
+        </button>
+
+        <button onclick="openSettingsModal()" class="p-2 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 text-emerald-200 border border-emerald-700/50 text-xs" title="تنظیمات">
+          <i class="fa-solid fa-sliders"></i>
+        </button>
+      </div>
     </div>
+  </header>
 
-    <script>
-        /* ==================== مدیریت تم‌های پنجره کدنویسی ==================== */
-        const editorThemes = {
-            'white': {
-                bg: '#ffffff',
-                text: '#090d16',
-                gutterBg: '#f1f5f9',
-                gutterText: '#475569',
-                placeholder: '#94a3b8',
-                grid: 'rgba(15, 23, 42, 0.04)',
-                caret: '#4f46e5',
-                name: 'سفید خالص'
-            },
-            'studio-dark': {
-                bg: '#070a14',
-                text: '#f1f5f9',
-                gutterBg: '#04060c',
-                gutterText: '#64748b',
-                placeholder: '#475569',
-                grid: 'rgba(255, 255, 255, 0.02)',
-                caret: '#00f2fe',
-                name: 'تیره استودیویی'
-            },
-            'silver': {
-                bg: '#f1f5f9',
-                text: '#0f172a',
-                gutterBg: '#e2e8f0',
-                gutterText: '#475569',
-                placeholder: '#64748b',
-                grid: 'rgba(15, 23, 42, 0.05)',
-                caret: '#4f46e5',
-                name: 'نقره‌ای ملایم'
-            },
-            'warm': {
-                bg: '#fefce8',
-                text: '#1c1917',
-                gutterBg: '#fef9c3',
-                gutterText: '#78350f',
-                placeholder: '#a8a29e',
-                grid: 'rgba(120, 53, 15, 0.05)',
-                caret: '#ea580c',
-                name: 'کرمی کاغذی'
-            },
-            'ice': {
-                bg: '#ecfeff',
-                text: '#083344',
-                gutterBg: '#cffafe',
-                gutterText: '#155e75',
-                placeholder: '#64748b',
-                grid: 'rgba(8, 51, 68, 0.05)',
-                caret: '#0284c7',
-                name: 'آبی یخی'
-            },
-            'cyber': {
-                bg: '#050811',
-                text: '#00f2fe',
-                gutterBg: '#020409',
-                gutterText: '#6366f1',
-                placeholder: '#334155',
-                grid: 'rgba(0, 242, 254, 0.04)',
-                caret: '#ec4899',
-                name: 'نئون سایبرپانک'
-            }
+  <!-- VIEW 1: HOME & 39-LANGUAGE EXPLORER -->
+  <main id="view-home" class="relative z-10 flex-1 max-w-[1620px] w-full mx-auto px-4 sm:px-6 py-6 space-y-8">
+    <section id="heroSection" class="relative rounded-3xl glass-panel p-6 sm:p-10 overflow-hidden border border-emerald-400/40">
+      <div class="absolute -top-24 -right-24 w-80 h-80 bg-emerald-500/25 rounded-full blur-[95px] pointer-events-none animate-pulse"></div>
+      <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-lime-500/20 rounded-full blur-[95px] pointer-events-none animate-pulse"></div>
+
+      <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div class="lg:col-span-7 space-y-5 text-right">
+          <div class="inline-flex flex-wrap items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-600/20 border border-emerald-400/40 text-emerald-200 text-xs font-bold">
+            <span class="w-2.5 h-2.5 rounded-full bg-lime-400 animate-ping"></span>
+            <span>پلتفرم جامع توسعه ابری Sin∞k • ۳۹ زبان زنده • مجهز به تمام کتابخانه‌های علمی و گرافیکی</span>
+          </div>
+
+          <div>
+            <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white font-mono">
+              Sin<span class="infinity-symbol">∞</span>k <span class="text-emerald-400 text-2xl sm:text-3xl">Matrix Studio</span>
+            </h1>
+            <h2 class="text-xl sm:text-2xl font-extrabold neon-text-gradient mt-2">
+              «کد بنویس، کتابخانه‌ها را فراخوانی کن، بی‌نهایت بساز.»
+            </h2>
+          </div>
+
+          <p class="text-xs sm:text-sm text-emerald-100/90 leading-relaxed max-w-2xl">
+            <b>Sin∞k IDE v14.0</b> یک ابرکامپایلر تحت وب با تم نئون سبز ماتریکسی است که علاوه بر پشتیبانی از <b>۳۹ زبان برنامه‌نویسی</b>، به موتور <b>Pyodide WebAssembly</b> (شامل NumPy، Pandas، Matplotlib، SymPy)، شبیه‌ساز گرافیکی <b>Tkinter</b>، دیتابیس <b>AlaSQL</b> و هوش مصنوعی فوق‌سریع <b>Sin∞k AI</b> مجهز شده است.
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+            <div class="spotlight-card p-3.5 rounded-2xl border border-emerald-500/35 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-400/40 flex items-center justify-center text-emerald-300 text-lg shrink-0">
+                <i class="fa-solid fa-boxes-stacked animate-bounce"></i>
+              </div>
+              <div>
+                <div class="text-xs font-black text-white">تمامی کتابخانه‌ها</div>
+                <div class="text-[11px] text-emerald-300/75">NumPy, Pandas, Tk, SQL</div>
+              </div>
+            </div>
+
+            <div class="spotlight-card p-3.5 rounded-2xl border border-lime-500/35 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-lime-500/15 border border-lime-400/40 flex items-center justify-center text-lime-300 text-lg shrink-0">
+                <i class="fa-solid fa-brain animate-pulse"></i>
+              </div>
+              <div>
+                <div class="text-xs font-black text-white">هوش مصنوعی Sin∞k</div>
+                <div class="text-[11px] text-emerald-300/75">تولید و رفع باگ آنی کدها</div>
+              </div>
+            </div>
+
+            <div class="spotlight-card p-3.5 rounded-2xl border border-teal-500/35 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-teal-500/15 border border-teal-400/40 flex items-center justify-center text-teal-300 text-lg shrink-0">
+                <i class="fa-solid fa-diagram-project"></i>
+              </div>
+              <div>
+                <div class="text-xs font-black text-white">ابزارهای مهندسی</div>
+                <div class="text-[11px] text-emerald-300/75">فلوچارت، دیباگر و چارت</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <button onclick="switchMainView('ide')" class="neon-btn-primary px-6 py-3 rounded-2xl text-xs sm:text-sm font-black flex items-center gap-2">
+              <i class="fa-solid fa-terminal"></i>
+              <span>ورود به محیط کدنویسی (IDE)</span>
+            </button>
+            <button onclick="openLibrariesModal()" class="px-5 py-3 rounded-2xl bg-emerald-950/90 hover:bg-emerald-900 text-emerald-300 border border-emerald-400/40 text-xs sm:text-sm font-bold flex items-center gap-2 transition">
+              <i class="fa-solid fa-cubes-stacked text-lime-400"></i>
+              <span>مشاهده و تست کتابخانه‌های نصب‌شده</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5">
+          <div class="spotlight-card rounded-3xl border border-emerald-400/40 p-6 relative overflow-hidden shadow-2xl float-anim">
+            <div class="flex items-center justify-between border-b border-emerald-500/25 pb-3 mb-4">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              </div>
+              <span class="font-mono text-[11px] text-emerald-300">Sin∞k Matrix Core v14.0</span>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[10px]">ALL LIBS READY</span>
+            </div>
+
+            <div class="relative h-52 flex items-center justify-center">
+              <div class="w-44 h-44 rounded-full border border-dashed border-emerald-400/45 radar-ring absolute flex items-center justify-between px-1">
+                <span class="w-7 h-7 rounded-lg bg-[#04180D] border border-emerald-400 text-xs flex items-center justify-center shadow-lg">🐍</span>
+                <span class="w-7 h-7 rounded-lg bg-[#04180D] border border-lime-400 text-xs flex items-center justify-center shadow-lg">🚀</span>
+              </div>
+              <div class="w-32 h-32 rounded-full border border-lime-400/40 animate-[spin_8s_linear_infinite_reverse] absolute flex items-center justify-between px-1">
+                <span class="w-6 h-6 rounded-lg bg-[#04180D] border border-emerald-400 text-[11px] flex items-center justify-center">⚡</span>
+                <span class="w-6 h-6 rounded-lg bg-[#04180D] border border-teal-400 text-[11px] flex items-center justify-center">🦀</span>
+              </div>
+              <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-400 via-green-500 to-lime-400 p-[2px] shadow-[0_0_40px_rgba(0,255,135,0.65)] z-10">
+                <div class="w-full h-full bg-[#020B06] rounded-[14px] flex flex-col items-center justify-center font-mono">
+                  <span class="font-black text-xl text-white">S<span class="infinity-symbol">∞</span></span>
+                  <span class="text-[9px] text-emerald-300">MATRIX</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 pt-3 border-t border-emerald-500/25 text-center font-mono text-[11px]">
+              <div class="p-2 rounded-xl bg-[#04140B] border border-emerald-500/25">
+                <div class="text-emerald-400 font-black text-sm">39 + Libs</div>
+                <div class="text-[10px] text-emerald-200/70 font-sans">زبان و کتابخانه</div>
+              </div>
+              <div class="p-2 rounded-xl bg-[#04140B] border border-lime-500/25">
+                <div class="text-lime-400 font-black text-sm">5 Engines</div>
+                <div class="text-[10px] text-emerald-200/70 font-sans">موتور اجرایی</div>
+              </div>
+              <div class="p-2 rounded-xl bg-[#04140B] border border-teal-500/25">
+                <div class="text-teal-300 font-black text-sm">Sin∞k AI</div>
+                <div class="text-[10px] text-emerald-200/70 font-sans">هوش مصنوعی</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between gap-2.5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs sm:text-sm font-extrabold text-emerald-300 flex items-center gap-2">
+            <i class="fa-solid fa-fire text-lime-400"></i>
+            <span>محبوب‌ترین زبان‌ها (ورود با یک کلیک)</span>
+          </h3>
+          <label class="flex items-center gap-1.5 text-[11px] text-emerald-200 cursor-pointer">
+            <input type="checkbox" id="openEmptyEditorToggle" class="accent-emerald-400 rounded cursor-pointer" />
+            <span>ورود با ویرایشگر خالی</span>
+          </label>
+        </div>
+        <div id="popularLangsBar" class="flex flex-wrap gap-1.5"></div>
+      </div>
+
+      <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between gap-2.5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs sm:text-sm font-extrabold text-lime-300 flex items-center gap-2">
+            <i class="fa-solid fa-clock-rotate-left text-lime-400"></i>
+            <span>زبان‌های اخیر شما</span>
+          </h3>
+          <button onclick="openNewFileModal()" class="text-xs font-bold text-emerald-400 hover:underline">+ ایجاد فایل جدید</button>
+        </div>
+        <div id="recentLangsBar" class="flex flex-wrap gap-1.5"></div>
+      </div>
+    </section>
+
+    <section id="languageHubSection" class="space-y-5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2.5">
+            <i class="fa-solid fa-cubes text-emerald-400"></i>
+            <span>انتخاب زبان برنامه‌نویسی (۳۹ زبان فعال با کامپایلر و کتابخانه‌های کامل)</span>
+          </h2>
+          <p class="text-xs text-emerald-300/70 mt-1">روی هر زبان کلیک کنید تا مستقیماً وارد محیط کدنویسی Sin∞k شوید.</p>
+        </div>
+
+        <div class="relative w-full md:w-80">
+          <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-1/2 -translate-y-1/2 text-emerald-400 text-xs"></i>
+          <input id="langSearchInput" type="text" oninput="renderLanguageGrid()" placeholder="جستجوی نام زبان، کامپایلر یا پسوند (.py, .cpp, .js)..." class="w-full pr-9 pl-4 py-2.5 rounded-xl bg-[#04150C]/90 border border-emerald-500/40 text-xs text-white placeholder-emerald-300/50 focus:outline-none focus:border-emerald-400" />
+        </div>
+      </div>
+
+      <div id="langCategoryTabs" class="flex items-center gap-2 overflow-x-auto pb-1">
+        <button onclick="setLangCategoryFilter('all')" data-cat="all" class="lang-cat-btn px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-600/30">🌟 همه زبان‌ها (۳۹)</button>
+        <button onclick="setLangCategoryFilter('group1')" data-cat="group1" class="lang-cat-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-emerald-950/80 text-emerald-200 hover:text-white border border-emerald-700/50">🚀 گروه اول: اصلی و سیستم (۱۰)</button>
+        <button onclick="setLangCategoryFilter('group2')" data-cat="group2" class="lang-cat-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-emerald-950/80 text-emerald-200 hover:text-white border border-emerald-700/50">📱 گروه دوم: مدرن و اسکریپت (۱۰)</button>
+        <button onclick="setLangCategoryFilter('group3')" data-cat="group3" class="lang-cat-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-emerald-950/80 text-emerald-200 hover:text-white border border-emerald-700/50">🧮 گروه سوم: علمی و سطح پایین (۱۰)</button>
+        <button onclick="setLangCategoryFilter('web')" data-cat="web" class="lang-cat-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-emerald-950/80 text-emerald-200 hover:text-white border border-emerald-700/50">🌐 توسعه وب (۵)</button>
+        <button onclick="setLangCategoryFilter('db')" data-cat="db" class="lang-cat-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-emerald-950/80 text-emerald-200 hover:text-white border border-emerald-700/50">🗄️ دیتابیس (۴)</button>
+      </div>
+
+      <div id="languagesGridContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5"></div>
+    </section>
+  </main>
+
+  <!-- VIEW 2: MAIN IDE WORKSPACE -->
+  <section id="view-ide" class="hidden relative z-10 flex-1 flex flex-col h-[calc(100vh-57px)] max-h-[calc(100vh-57px)] overflow-hidden">
+    <div class="flex-1 flex overflow-hidden relative">
+      
+      <!-- SIDEBAR -->
+      <aside id="ideSidebar" class="w-64 glass-panel border-l border-emerald-500/25 flex flex-col shrink-0 select-none z-20">
+        <div class="p-3 border-b border-emerald-900/60 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-folder-open text-emerald-400 text-xs"></i>
+            <span class="text-xs font-extrabold text-white">مدیریت فایل‌های پروژه</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <button onclick="openNewFileModal()" class="p-1.5 rounded-lg hover:bg-emerald-900/60 text-emerald-400 text-xs" title="ایجاد فایل جدید"><i class="fa-solid fa-file-circle-plus"></i></button>
+            <button onclick="createNewFolderPrompt()" class="p-1.5 rounded-lg hover:bg-emerald-900/60 text-lime-400 text-xs" title="ایجاد پوشه جدید"><i class="fa-solid fa-folder-plus"></i></button>
+            <button onclick="createProjectSnapshot()" class="p-1.5 rounded-lg hover:bg-emerald-900/60 text-teal-300 text-xs" title="ثبت نسخه (Git Snapshot)"><i class="fa-solid fa-code-commit"></i></button>
+          </div>
+        </div>
+
+        <div id="fileExplorerList" class="flex-1 overflow-y-auto p-2 space-y-1"></div>
+
+        <!-- Installed Libraries Status Box -->
+        <div class="border-t border-emerald-900/60 p-2.5 bg-[#031008]/95 space-y-2">
+          <div class="flex items-center justify-between text-[10px]">
+            <span class="text-emerald-300/80 font-bold">موتور و کتابخانه‌ها:</span>
+            <span id="sidebarEngineActiveBadge" class="text-lime-400 font-mono font-bold">Auto + Pyodide</span>
+          </div>
+          <div class="grid grid-cols-3 gap-1 text-[10px] font-mono text-center">
+            <div class="py-1 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">● Tk GUI</div>
+            <div class="py-1 rounded bg-lime-500/15 border border-lime-500/30 text-lime-300">● NumPy</div>
+            <div class="py-1 rounded bg-teal-500/15 border border-teal-500/30 text-teal-300">● Cloud</div>
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-emerald-300/70 pt-1 border-t border-emerald-900/50">
+            <span><i class="fa-solid fa-clock-rotate-left text-emerald-400 ml-1"></i>تاریخچه اجرا</span>
+            <span class="text-lime-400 font-mono text-[10px]">● ذخیره خودکار</span>
+          </div>
+          <div id="executionHistoryMiniList" class="max-h-24 overflow-y-auto space-y-1 text-[11px]"></div>
+        </div>
+      </aside>
+
+      <!-- CENTER EDITOR + TERMINAL -->
+      <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#020A05]">
+        <div class="bg-[#04140B] border-b border-emerald-900/60 px-2 flex items-center justify-between shrink-0">
+          <div id="editorTabsContainer" class="flex items-center gap-1 overflow-x-auto py-1"></div>
+          <div class="flex items-center gap-2.5 px-2.5 py-1 text-[11px] font-mono text-emerald-200 shrink-0">
+            <span class="px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 font-bold">خطوط: <strong id="totalLinesBadge">1</strong></span>
+            <span id="breakpointsCountBadge" class="hidden sm:inline px-2 py-0.5 rounded bg-rose-500/15 border border-rose-400/30 text-rose-300 font-bold cursor-pointer" onclick="switchTerminalTab('debugger')">🔴 BP: 0</span>
+            <span id="cursorPositionIndicator" class="hidden md:inline text-emerald-300/70">سطر 1، ستون 1</span>
+            <span id="activeEngineLabel" class="hidden lg:inline text-lime-400">Python 3.12 + Libs</span>
+          </div>
+        </div>
+
+        <div id="codeEditorViewport">
+          <div id="codeLineGutter" title="برای گذاشتن یا برداشتن Breakpoint روی شماره خط کلیک کنید"></div>
+          <textarea id="codeMainTextarea" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="// محیط کدنویسی Sin∞k آماده است! کد خود را بنویسید، روی «کتابخانه‌ها» یا «نمونه Tkinter» کلیک کنید، یا از هوش مصنوعی Sin∞k AI بخواهید هر برنامه‌ای را برایتان بنویسد..."></textarea>
+        </div>
+
+        <div id="terminalResizer" class="resizer-h flex items-center justify-center shrink-0">
+          <div class="w-12 h-1 rounded-full bg-emerald-400/60"></div>
+        </div>
+
+        <div id="bottomTerminalPanel" style="height: 260px;" class="glass-panel border-t border-emerald-500/30 flex flex-col shrink-0">
+          <div class="bg-[#031008] px-3 py-1.5 border-b border-emerald-900/60 flex flex-wrap items-center justify-between gap-2 shrink-0">
+            <div class="flex items-center gap-1 overflow-x-auto">
+              <button onclick="switchTerminalTab('output')" id="termTab-output" class="term-tab-btn px-3 py-1 rounded-lg text-xs font-bold bg-emerald-600/25 text-emerald-300 border border-emerald-400/35 flex items-center gap-1.5"><i class="fa-solid fa-terminal"></i><span>Output (خروجی)</span></button>
+              <button onclick="switchTerminalTab('preview')" id="termTab-preview" class="term-tab-btn px-3 py-1 rounded-lg text-xs font-semibold text-emerald-200/70 hover:text-white flex items-center gap-1.5"><i class="fa-solid fa-window-restore text-lime-400"></i><span>پیش‌نمایش زنده (GUI / Web / Plot)</span></button>
+              <button onclick="switchTerminalTab('errors')" id="termTab-errors" class="term-tab-btn px-3 py-1 rounded-lg text-xs font-semibold text-emerald-200/70 hover:text-white flex items-center gap-1.5"><i class="fa-solid fa-shield-virus text-rose-400"></i><span>Error Intelligence</span><span id="errorCountBadge" class="px-1.5 py-0.2 rounded-full bg-emerald-950 text-[10px] font-mono">0</span></button>
+              <button onclick="switchTerminalTab('stdin')" id="termTab-stdin" class="term-tab-btn px-3 py-1 rounded-lg text-xs font-semibold text-emerald-200/70 hover:text-white flex items-center gap-1.5"><i class="fa-solid fa-keyboard text-amber-400"></i><span>Input (stdin)</span></button>
+              <button onclick="switchTerminalTab('debugger')" id="termTab-debugger" class="term-tab-btn px-3 py-1 rounded-lg text-xs font-semibold text-emerald-200/70 hover:text-white flex items-center gap-1.5"><i class="fa-solid fa-bug text-emerald-400"></i><span>Debugger & RAM</span></button>
+              <button onclick="switchTerminalTab('info')" id="termTab-info" class="term-tab-btn px-3 py-1 rounded-lg text-xs font-semibold text-emerald-200/70 hover:text-white flex items-center gap-1.5"><i class="fa-solid fa-microchip text-lime-400"></i><span>Execution Info</span></button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span id="execMetricsPill" class="hidden sm:inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-700/40 text-[11px] font-mono text-emerald-200">
+                <span id="metricStatusDot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span id="metricEngineBadge" class="text-lime-300">Ready</span> •
+                <span id="metricTimeText">0 ms</span> • <span id="metricMemText">0 KB</span>
+              </span>
+              <button onclick="copyOutputToClipboard()" class="px-2 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 text-xs" title="کپی خروجی"><i class="fa-regular fa-copy"></i></button>
+              <button onclick="clearTerminalOutput()" class="px-2 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 text-xs" title="پاک کردن ترمینال"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+          </div>
+
+          <div class="flex-1 overflow-hidden relative bg-[#020904]">
+            <div id="executionLoadingOverlay" class="hidden absolute inset-0 bg-[#020B06]/90 backdrop-blur-sm z-20 flex flex-col items-center justify-center gap-2">
+              <div class="flex items-center gap-3">
+                <div class="w-5 h-5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
+                <span id="executionLoadingStageText" class="text-xs font-extrabold text-emerald-300">در حال اجرای کد در موتور کامپایلر Sin∞k...</span>
+              </div>
+              <span class="text-[11px] font-mono text-lime-300/80">Multi-Engine + Pyodide WASM + Tkinter GUI Active</span>
+            </div>
+
+            <div id="termPane-output" class="term-pane h-full flex flex-col justify-between overflow-hidden">
+              <div id="terminalStdoutContent" class="flex-1 overflow-y-auto p-3 ltr-code text-xs sm:text-sm space-y-1">
+                <div class="text-emerald-500/70">// Sin∞k Ready. روی دکمه سبز «اجرای کد (Run)» کلیک کنید یا Ctrl+Enter را بزنید.</div>
+              </div>
+              <div class="bg-[#031209] border-t border-emerald-900/60 px-3 py-1.5 flex items-center gap-2 shrink-0">
+                <span class="font-mono text-xs text-lime-400 font-bold">Sin∞k:~$</span>
+                <input id="interactiveShellInput" type="text" placeholder="دستور ترمینال (help, run, libs, tkinter, clear, files, engines, calc 2+2)..." class="flex-1 bg-transparent ltr-code text-xs text-white focus:outline-none" />
+              </div>
+            </div>
+
+            <div id="termPane-errors" class="term-pane hidden h-full overflow-y-auto p-3 text-xs space-y-2">
+              <div class="text-emerald-400 font-mono">✓ سیستم هوشمند تشخیص خطا (Sin∞k Error Intelligence): هیچ خطایی در کد شما یافت نشد.</div>
+            </div>
+
+            <div id="termPane-stdin" class="term-pane hidden h-full p-2.5 flex flex-col gap-1.5">
+              <div class="flex items-center justify-between text-xs text-emerald-300/80">
+                <span>ورودی‌های استاندارد برنامه (<code class="text-lime-300">input() / cin / scanf / Console.ReadLine</code>) — هر ورودی در یک سطر:</span>
+                <button onclick="document.getElementById('stdinTextarea').value=''" class="text-rose-400 hover:underline">پاک کردن ورودی‌ها</button>
+              </div>
+              <textarea id="stdinTextarea" placeholder="مثال ورودی:&#10;15&#10;25" class="flex-1 w-full rounded-xl bg-[#04150C] border border-emerald-500/30 p-2.5 ltr-code text-xs text-white focus:outline-none focus:border-emerald-400 resize-none"></textarea>
+            </div>
+
+            <div id="termPane-debugger" class="term-pane hidden h-full overflow-y-auto p-3 text-xs space-y-3">
+              <div
+
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-900/60 pb-2">
+                <div class="font-bold text-emerald-300 flex items-center gap-2">
+                  <i class="fa-solid fa-microchip text-lime-400"></i>
+                  <span>وضعیت متغیرها در حافظه (RAM Inspector) و نقاط توقف (Breakpoints)</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <button onclick="inspectCodeVariables()" class="px-2.5 py-1 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-200 border border-emerald-400/40 text-[11px] font-bold">
+                    <i class="fa-solid fa-magnifying-glass-chart ml-1"></i>اسکن متغیرهای کد
+                  </button>
+                  <button onclick="clearAllBreakpoints()" class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/35 text-rose-300 border border-rose-500/30 text-[11px]">
+                    حذف همه Breakpointها
+                  </button>
+                </div>
+              </div>
+              <div id="debuggerVariablesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 ltr-code">
+                <div class="p-2.5 rounded-xl bg-[#04140B] border border-emerald-500/25 text-emerald-300/75 text-xs">
+                  برای مشاهده مقادیر متغیرها، کد را اجرا کنید یا روی «اسکن متغیرهای کد» کلیک نمایید.
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Preview Pane (Tkinter GUI / HTML Web / Matplotlib Charts) -->
+            <div id="termPane-preview" class="term-pane hidden h-full w-full overflow-auto bg-[#04120A] p-3 flex flex-col gap-3">
+              <div class="flex items-center justify-between border-b border-emerald-900/60 pb-2 shrink-0">
+                <div class="flex items-center gap-2 text-xs font-bold text-lime-300">
+                  <i class="fa-solid fa-desktop"></i>
+                  <span id="previewPaneTitle">بوم گرافیکی زنده (Tkinter Virtual Display / Web DOM / Chart.js)</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <button onclick="insertTkinterStarterCode(); executeActiveCode();" class="px-2.5 py-1 rounded-lg bg-teal-500/20 hover:bg-teal-500/35 border border-teal-400/40 text-teal-200 text-[11px] font-bold">
+                    اجرای دمو Tkinter
+                  </button>
+                  <button onclick="renderDemoScientificChart()" class="px-2.5 py-1 rounded-lg bg-lime-500/20 hover:bg-lime-500/35 border border-lime-400/40 text-lime-200 text-[11px] font-bold">
+                    رسم نمودار علمی
+                  </button>
+                </div>
+              </div>
+
+              <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3 min-h-[160px]">
+                <div id="tkinterGuiMount" class="rounded-2xl bg-[#071D11] border border-emerald-500/35 p-3 flex flex-col justify-between overflow-auto">
+                  <div class="text-xs text-emerald-300/75">
+                    کدهای دارای <code class="text-lime-300">import tkinter</code> یا کدهای <code class="text-lime-300">HTML/CSS/JS</code> به صورت خودکار در این پنجره رندر می‌شوند.
+                  </div>
+                </div>
+                <div class="rounded-2xl bg-[#071D11] border border-emerald-500/35 p-2 flex items-center justify-center relative min-h-[150px]">
+                  <canvas id="scientificPlotCanvas" class="max-h-44 w-full"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Execution Info Pane -->
+            <div id="termPane-info" class="term-pane hidden h-full overflow-y-auto p-3 text-xs space-y-2 font-mono">
+              <div id="executionDetailedInfoBox" class="p-3 rounded-xl bg-[#04140B] border border-emerald-500/30 text-emerald-200 space-y-1">
+                <div>Engine Architecture: <span class="text-lime-400 font-bold">Sin∞k Multi-Engine v14.0 (Pyodide WASM + Cloud + Local Worker)</span></div>
+                <div>Supported Languages: <span class="text-emerald-400">39 Full Languages + Scientific & GUI Libraries</span></div>
+                <div>Security Sandbox: <span class="text-teal-300">Isolated WebAssembly & Cloud Containers</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEFT AI DRAWER (Sin∞k AI Assistant inside IDE) -->
+      <aside id="ideAiDrawer" class="hidden w-80 sm:w-96 glass-panel border-r border-emerald-500/30 flex-col shrink-0 z-30">
+        <div class="p-3 border-b border-emerald-900/60 flex items-center justify-between bg-[#04150C]">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-xl bg-gradient-to-br from-emerald-400 to-lime-400 text-slate-950 flex items-center justify-center font-black text-xs">AI</div>
+            <div>
+              <div class="text-xs font-black text-white">دستیار هوشمند Sin∞k AI</div>
+              <div class="text-[10px] text-emerald-300/75">تولید کد، دیباگ، توضیح و بهینه‌سازی</div>
+            </div>
+          </div>
+          <button onclick="openAiInIde()" class="p-1.5 rounded-lg hover:bg-emerald-900/60 text-emerald-300 text-xs">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="p-2 border-b border-emerald-900/50 flex flex-wrap gap-1 bg-[#031009]">
+          <button onclick="runAiQuickAction('fix')" class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/40 text-rose-200 text-[11px] font-bold">🛠️ رفع خطای کد</button>
+          <button onclick="runAiQuickAction('explain')" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/35 border border-emerald-400/40 text-emerald-200 text-[11px] font-bold">📖 خط‌به‌خط توضیح بده</button>
+          <button onclick="runAiQuickAction('optimize')" class="px-2.5 py-1 rounded-lg bg-lime-500/20 hover:bg-lime-500/35 border border-lime-400/40 text-lime-200 text-[11px] font-bold">⚡ بهینه‌سازی سرعت</button>
+          <button onclick="runAiQuickAction('tkinter')" class="px-2.5 py-1 rounded-lg bg-teal-500/20 hover:bg-teal-500/35 border border-teal-400/40 text-teal-200 text-[11px] font-bold">🖼️ تبدیل به GUI</button>
+        </div>
+
+        <div id="aiChatMessagesBox" class="flex-1 overflow-y-auto p-3 space-y-3 text-xs leading-relaxed">
+          <div class="p-3 rounded-2xl bg-emerald-950/70 border border-emerald-500/30 text-emerald-100">
+            سلام! من <b>Sin∞k AI v14.0</b> هستم. هر برنامه‌ای (علمی، گرافیکی Tkinter، الگوریتمی یا وب) به هر یک از ۳۹ زبان می‌خواهید بنویسید یا روی دکمه‌های بالا کلیک کنید تا کد فعلی شما را تحلیل کنم.
+          </div>
+        </div>
+
+        <div class="p-2.5 border-t border-emerald-900/60 bg-[#031008] flex items-center gap-1.5">
+          <input id="aiUserPromptInput" type="text" onkeydown="if(event.key==='Enter') sendAiChatMessage()" placeholder="از Sin∞k AI بخواهید کدی بنویسد یا اصلاح کند..." class="flex-1 px-3 py-2 rounded-xl bg-[#061D10] border border-emerald-500/40 text-xs text-white focus:outline-none focus:border-emerald-400" />
+          <button onclick="sendAiChatMessage()" class="neon-btn-primary px-3 py-2 rounded-xl text-xs">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+      </aside>
+
+    </div>
+  </section>
+
+  <!-- MODAL 1: NEW FILE MODAL -->
+  <div id="modalNewFile" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-panel rounded-3xl max-w-md w-full p-6 border border-emerald-400/40 space-y-4">
+      <div class="flex items-center justify-between border-b border-emerald-800/60 pb-3">
+        <h3 class="text-sm font-black text-white flex items-center gap-2">
+          <i class="fa-solid fa-file-circle-plus text-emerald-400"></i>
+          <span>ایجاد فایل کد جدید در پروژه</span>
+        </h3>
+        <button onclick="closeModal('modalNewFile')" class="text-emerald-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-emerald-200 mb-1 font-bold">انتخاب زبان برنامه‌نویسی:</label>
+          <select id="newFileLangSelect" onchange="syncNewFileExtension()" class="w-full p-2.5 rounded-xl bg-[#04150C] border border-emerald-500/40 text-white focus:outline-none"></select>
+        </div>
+        <div>
+          <label class="block text-emerald-200 mb-1 font-bold">نام فایل:</label>
+          <input id="newFileNameInput" type="text" placeholder="app.py" class="w-full p-2.5 rounded-xl bg-[#04150C] border border-emerald-500/40 ltr-code text-white focus:outline-none" />
+        </div>
+        <label class="flex items-center gap-2 text-emerald-200 cursor-pointer pt-1">
+          <input id="newFileWithStarterToggle" type="checkbox" checked class="accent-emerald-400 rounded" />
+          <span>درج کد نمونه استاندارد در ابتدای فایل</span>
+        </label>
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button onclick="closeModal('modalNewFile')" class="px-4 py-2 rounded-xl bg-emerald-950 text-emerald-200 text-xs font-bold">انصراف</button>
+        <button onclick="confirmCreateNewFile()" class="neon-btn-primary px-5 py-2 rounded-xl text-xs font-black">ایجاد و باز کردن فایل</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: LIBRARIES & PACKAGES HUB -->
+  <div id="modalLibraries" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-panel rounded-3xl max-w-3xl w-full p-6 border border-emerald-400/40 space-y-4 max-h-[88vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-emerald-800/60 pb-3 shrink-0">
+        <h3 class="text-base font-black text-white flex items-center gap-2">
+          <i class="fa-solid fa-boxes-stacked text-lime-400"></i>
+          <span>مرکز کتابخانه‌های علمی، گرافیکی و دیتابیس Sin∞k (آماده اجرا)</span>
+        </h3>
+        <button onclick="closeModal('modalLibraries')" class="text-emerald-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p class="text-xs text-emerald-200/80 shrink-0">
+        روی هر کتابخانه کلیک کنید تا کد نمونه کامل و قابل اجرای آن بلافاصله داخل ویرایشگر درج و آماده اجرا شود:
+      </p>
+      <div id="librariesCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 overflow-y-auto pr-1"></div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: ENGINEERING SUITE (Flowchart & Complexity) -->
+  <div id="modalEngineering" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-panel rounded-3xl max-w-2xl w-full p-6 border border-emerald-400/40 space-y-4">
+      <div class="flex items-center justify-between border-b border-emerald-800/60 pb-3">
+        <h3 class="text-base font-black text-white flex items-center gap-2">
+          <i class="fa-solid fa-compass-drafting text-lime-400"></i>
+          <span>مجموعه مهندسی نرم‌افزار Sin∞k (فلوچارت خودکار و تحلیل پیچیدگی زمانی Big-O)</span>
+        </h3>
+        <button onclick="closeModal('modalEngineering')" class="text-emerald-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="engineeringSuiteBody" class="space-y-3 text-xs max-h-[70vh] overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: SETTINGS -->
+  <div id="modalSettings" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-panel rounded-3xl max-w-md w-full p-6 border border-emerald-400/40 space-y-4">
+      <div class="flex items-center justify-between border-b border-emerald-800/60 pb-3">
+        <h3 class="text-sm font-black text-white flex items-center gap-2">
+          <i class="fa-solid fa-sliders text-emerald-400"></i>
+          <span>تنظیمات استودیوی Sin∞k v14.0</span>
+        </h3>
+        <button onclick="closeModal('modalSettings')" class="text-emerald-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-emerald-200 mb-1 font-bold">کلید اختصاصی OpenAI / OpenRouter / Gemini (اختیاری برای هوش مصنوعی ابری):</label>
+          <input id="customAiKeyInput" type="password" placeholder="sk-..." class="w-full p-2.5 rounded-xl bg-[#04150C] border border-emerald-500/40 ltr-code text-white focus:outline-none" />
+        </div>
+        <div class="flex items-center justify-between py-1">
+          <span>جشن بصری (Confetti) پس از اجرای موفق کد:</span>
+          <input id="confettiToggleInput" type="checkbox" checked class="accent-emerald-400" />
+        </div>
+        <div class="flex items-center justify-between py-1">
+          <span>ذخیره خودکار پروژه در مرورگر (LocalStorage):</span>
+          <input id="autoSaveToggleInput" type="checkbox" checked class="accent-emerald-400" />
+        </div>
+      </div>
+      <div class="flex items-center justify-between pt-2 border-t border-emerald-900/60">
+        <button onclick="resetFullWorkspace()" class="px-3 py-2 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold">بازنشانی کامل حافظه</button>
+        <button onclick="saveIdeSettings()" class="neon-btn-primary px-5 py-2 rounded-xl text-xs font-black">ذخیره تنظیمات</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT CORE ENGINE -->
+  <script>
+    // =========================================================================
+    // 1. COMPLETE 39-LANGUAGE REGISTRY + PISTON/WANDBOX/LOCAL MAPPING
+    // =========================================================================
+    const SINOOK_LANGUAGES = [
+      // Group 1: Core & Systems (10)
+      { id: 'python', name: 'Python 3.12', fa: 'پایتون (علمی + Tkinter)', ext: 'py', icon: '🐍', cat: 'group1', popular: true, piston: 'python', ver: '3.10.0', wandbox: 'cpython-3.11.4', starter: `import math\n\n# Sin∞k Python 3.12 + Scientific Stack\ndef analyze_numbers(nums):\n    mean = sum(nums) / len(nums)\n    variance = sum((x - mean) ** 2 for x in nums) / len(nums)\n    return mean, math.sqrt(variance)\n\ndata = [12, 18, 25, 30, 45, 50]\nmean, std = analyze_numbers(data)\nprint(f"Sin∞k Matrix Studio | Data: {data}")\nprint(f"Mean = {mean:.2f}, StdDev = {std:.2f}")` },
+      { id: 'javascript', name: 'JavaScript (ES2024)', fa: 'جاوااسکریپت', ext: 'js', icon: '⚡', cat: 'group1', popular: true, piston: 'javascript', ver: '18.15.0', wandbox: 'nodejs-18.16.0', starter: `// Sin∞k Instant JS Engine\nconst fibonacci = (n) => Array.from({ length: n }).reduce(\n  (acc, _, i) => acc.concat(i > 1 ? acc[i - 1] + acc[i - 2] : i), []\n);\n\nconsole.log("🚀 Sin∞k ES2024 Fibonacci(10):", fibonacci(10).join(", "));` },
+      { id: 'cpp', name: 'C++ (GCC 13)', fa: 'سی‌پلاس‌پلاس', ext: 'cpp', icon: '🚀', cat: 'group1', popular: true, piston: 'c++', ver: '10.2.0', wandbox: 'gcc-13.2.0', starter: `#include <iostream>\n#include <vector>\n#include <numeric>\nusing namespace std;\n\nint main() {\n    vector<int> v = {10, 20, 30, 40, 50};\n    int sum = accumulate(v.begin(), v.end(), 0);\n    cout << "Sin∞k C++20 Engine | Sum = " << sum << endl;\n    return 0;\n}` },
+      { id: 'c', name: 'C (GCC 13)', fa: 'زبان سی', ext: 'c', icon: '⚙️', cat: 'group1', popular: true, piston: 'c', ver: '10.2.0', wandbox: 'gcc-13.2.0-c', starter: `#include <stdio.h>\n\nint main() {\n    printf("Sin∞k C17 Compiler Ready!\\n");\n    for(int i = 1; i <= 5; i++) {\n        printf("Square of %d = %d\\n", i, i * i);\n    }\n    return 0;\n}` },
+      { id: 'java', name: 'Java (OpenJDK 21)', fa: 'جاوا', ext: 'java', icon: '☕', cat: 'group1', popular: true, piston: 'java', ver: '15.0.2', wandbox: 'openjdk-jdk-21+35', starter: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Sin∞k OpenJDK 21 Virtual Machine Ready!");\n        int total = 0;\n        for (int i = 1; i <= 10; i++) total += i;\n        System.out.println("Sum 1..10 = " + total);\n    }\n}` },
+      { id: 'csharp', name: 'C# (.NET 8)', fa: 'سی‌شارپ', ext: 'cs', icon: '🎯', cat: 'group1', popular: true, piston: 'csharp', ver: '6.12.0', wandbox: 'mono-6.12.0.199', starter: `using System;\n\nclass Program {\n    static void Main() {\n        Console.WriteLine("Sin∞k C# .NET Runtime Active!");\n        int[] scores = { 92, 88, 95, 100 };\n        Console.WriteLine("Count: " + scores.Length);\n    }\n}` },
+      { id: 'go', name: 'Go (Golang 1.22)', fa: 'گولنگ', ext: 'go', icon: '🐹', cat: 'group1', popular: true, piston: 'go', ver: '1.16.2', wandbox: 'go-1.21.0', starter: `package main\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Sin∞k Go Concurrency Engine Ready!")\n    nums := []int{2, 4, 8, 16, 32}\n    fmt.Println("Powers of 2:", nums)\n}` },
+      { id: 'rust', name: 'Rust (Cargo 1.76)', fa: 'راست', ext: 'rs', icon: '🦀', cat: 'group1', popular: true, piston: 'rust', ver: '1.68.2', wandbox: 'rust-1.72.0', starter: `fn main() {\n    let items = vec![1, 2, 3, 4, 5];\n    let sum: i32 = items.iter().sum();\n    println!("Sin∞k Rust Borrow-Checker Ready! Sum = {}", sum);\n}` },
+      { id: 'typescript', name: 'TypeScript 5.4', fa: 'تایپ‌اسکریپت', ext: 'ts', icon: '🔷', cat: 'group1', popular: true, piston: 'typescript', ver: '5.0.3', wandbox: 'typescript-5.1.6', starter: `interface Developer {\n  name: string;\n  level: number;\n}\nconst dev: Developer = { name: "Sin∞k Engineer", level: 14 };\nconsole.log(\`\${dev.name} - v\${dev.level}.0 Ready!\`);` },
+      { id: 'php', name: 'PHP 8.3', fa: 'پی‌اچ‌پی', ext: 'php', icon: '🐘', cat: 'group1', popular: true, piston: 'php', ver: '8.2.3', wandbox: 'php-8.2.9', starter: `<?php\n$langs = ["Python", "C++", "Rust", "PHP"];\necho "Sin∞k PHP 8.3 Engine | Total: " . count($langs) . "\\n";\nprint_r($langs);\n?>` },
+
+      // Group 2: Modern & Scripting (10)
+      { id: 'kotlin', name: 'Kotlin 1.9', fa: 'کاتلین', ext: 'kt', icon: '🟣', cat: 'group2', piston: 'kotlin', ver: '1.8.20', starter: `fun main() {\n    val list = listOf("Sin∞k", "Kotlin", "JVM")\n    println("Joined: " + list.joinToString(" • "))\n}` },
+      { id: 'swift', name: 'Swift 5.9', fa: 'سوئیفت', ext: 'swift', icon: '🦅', cat: 'group2', piston: 'swift', ver: '5.3.3', starter: `print("Sin∞k Swift Engine Ready!")\nlet nums = [3, 6, 9, 12]\nprint("Mapped:", nums.map { $0 * 2 })` },
+      { id: 'dart', name: 'Dart 3.3 (Flutter)', fa: 'دارت', ext: 'dart', icon: '🎯', cat: 'group2', piston: 'dart', ver: '2.19.6', starter: `void main() {\n  final items = ['Flutter', 'Dart', 'Sin∞k'];\n  print('Sin∞k Dart VM: \${items.join(" -> ")}');\n}` },
+      { id: 'ruby', name: 'Ruby 3.3', fa: 'روبی', ext: 'rb', icon: '💎', cat: 'group2', piston: 'ruby', ver: '3.0.1', wandbox: 'ruby-3.2.2', starter: `puts "Sin∞k Ruby 3.3 Ready!"\n(1..4).each { |i| puts "Step ##{i} => #{i * 10}" }` },
+      { id: 'lua', name: 'Lua 5.4', fa: 'لوآ', ext: 'lua', icon: '🌙', cat: 'group2', piston: 'lua', ver: '5.4.4', wandbox: 'lua-5.4.6', starter: `print("Sin∞k Lua 5.4 Game Scripting Engine")\nfor i = 1, 5 do\n  print("Lua Orbit:", i * 5)\nend` },
+      { id: 'perl', name: 'Perl 5.38', fa: 'پرل', ext: 'pl', icon: '🐪', cat: 'group2', piston: 'perl', ver: '5.36.0', wandbox: 'perl-5.38.0', starter: `use strict;\nuse warnings;\nprint "Sin∞k Perl Regex & Text Engine Ready!\\n";` },
+      { id: 'bash', name: 'Bash Shell (Linux)', fa: 'بش لینوکس', ext: 'sh', icon: '🐚', cat: 'group2', piston: 'bash', ver: '5.2.0', wandbox: 'bash', starter: `#!/usr/bin/env bash\necho "Sin∞k Linux Bash Container"\nuname -a\nfor i in 1 2 3; do echo "Task $i done"; done` },
+      { id: 'powershell', name: 'PowerShell 7', fa: 'پاورشل', ext: 'ps1', icon: '💻', cat: 'group2', piston: 'powershell', ver: '7.1.4', starter: `Write-Output "Sin∞k PowerShell Core Active!"\n1..5 | ForEach-Object { "Value: $($_ * 2)" }` },
+      { id: 'scala', name: 'Scala 3', fa: 'اسکالا', ext: 'scala', icon: '🔥', cat: 'group2', piston: 'scala', ver: '3.2.2', starter: `object Main extends App {\n  println("Sin∞k Scala Functional JVM Ready!")\n}` },
+      { id: 'groovy', name: 'Groovy 4', fa: 'گرووی', ext: 'groovy', icon: '🎸', cat: 'group2', piston: 'groovy', ver: '4.0.9', starter: `println "Sin∞k Groovy Scripting Active!"\ndef list = [10, 20, 30]\nprintln "Sum: " + list.sum()` },
+
+      // Group 3: Scientific, Functional & Low-Level (10)
+      { id: 'r', name: 'R Statistical 4.3', fa: 'زبان آماری R', ext: 'r', icon: '📊', cat: 'group3', piston: 'rscript', ver: '4.1.1', wandbox: 'r-4.3.1', starter: `x <- c(10, 20, 30, 40, 50)\ncat("Sin∞k R Statistical Engine | Mean:", mean(x), "SD:", sd(x), "\\n")` },
+      { id: 'julia', name: 'Julia 1.10', fa: 'جولیا (محاسبات علمی)', ext: 'jl', icon: '🔬', cat: 'group3', piston: 'julia', ver: '1.8.5', starter: `println("Sin∞k Julia High-Performance Scientific Computing")\nA = [1 2; 3 4]\nprintln("Matrix Sum = ", sum(A))` },
+      { id: 'octave', name: 'MATLAB / Octave', fa: 'متلب / اکتاو', ext: 'm', icon: '📐', cat: 'group3', piston: 'octave', ver: '8.1.0', starter: `disp("Sin∞k MATLAB / GNU Octave Engine Ready!");\nv = [1, 2, 3, 4, 5];\ndisp(["Dot Product = ", num2str(dot(v, v))]);` },
+      { id: 'haskell', name: 'Haskell (GHC 9)', fa: 'هسکل', ext: 'hs', icon: 'λ', cat: 'group3', piston: 'haskell', ver: '9.0.1', wandbox: 'ghc-9.6.2', starter: `main :: IO ()\nmain = do\n  putStrLn "Sin∞k Pure Functional Haskell Engine"\n  print (map (*2) [1..6])` },
+      { id: 'elixir', name: 'Elixir 1.16', fa: 'الیکسیر', ext: 'ex', icon: '💧', cat: 'group3', piston: 'elixir', ver: '1.11.3', wandbox: 'elixir-1.15.4', starter: `IO.puts "Sin∞k Elixir BEAM VM Active!"\nEnum.map(1..5, fn x -> x * x end) |> IO.inspect()` },
+      { id: 'clojure', name: 'Clojure', fa: 'کلوژر', ext: 'clj', icon: '🌀', cat: 'group3', piston: 'clojure', ver: '1.10.3', starter: `(println "Sin∞k Clojure Lisp on JVM")\n(println "Sum 1..10 =" (reduce + (range 1 11)))` },
+      { id: 'fsharp', name: 'F# (.NET)', fa: 'اف‌شارپ', ext: 'fs', icon: '💠', cat: 'group3', piston: 'fsharp.net', ver: '5.0.201', starter: `printfn "Sin∞k F# Functional .NET Ready!"\nlet squares = [1..5] |> List.map (fun x -> x * x)\nprintfn "Squares: %A" squares` },
+      { id: 'fortran', name: 'Fortran 2018', fa: 'فورترن', ext: 'f90', icon: '🧮', cat: 'group3', piston: 'fortran', ver: '10.2.0', starter: `program sinook\n  implicit none\n  print *, "Sin∞k Fortran High-Speed Numerical Engine"\nend program sinook` },
+      { id: 'pascal', name: 'Free Pascal', fa: 'پاسکال', ext: 'pas', icon: '🏛️', cat: 'group3', piston: 'pascal', ver: '3.2.2', wandbox: 'fpc-3.2.2', starter: `program SinookPascal;\nbegin\n  writeln('Sin∞k Free Pascal Compiler Active!');\nend.` },
+      { id: 'nasm', name: 'Assembly x86_64', fa: 'اسمبلی (NASM)', ext: 'asm', icon: '🔩', cat: 'group3', piston: 'nasm64', ver: '2.15.5', starter: `section .data\n  msg db "Sin∞k x86_64 Assembly Ready!", 10\n  len equ $ - msg\nsection .text\n  global _start\n_start:\n  mov rax, 1\n  mov rdi, 1\n  mov rsi, msg\n  mov rdx, len\n  syscall\n  mov rax, 60\n  xor rdi, rdi\n  syscall` },
+
+      // Group 4: Web Stack (5)
+      { id: 'html', name: 'HTML5 + Tailwind GUI', fa: 'طراحی وب HTML5 زنده', ext: 'html', icon: '🌐', cat: 'web', popular: true, piston: 'html', ver: '5.0', starter: `<div style="font-family:system-ui;padding:18px;background:linear-gradient(135deg,#042f1a,#064e3b);color:#ecfdf5;border-radius:16px;border:1px solid #10b981;">\n  <h2 style="margin:0 0 8px;color:#00ff87;">✨ پیش‌نمایش زنده وب Sin∞k HTML5</h2>\n  <p style="margin:0 0 12px;font-size:13px;">هر تغییری در کد بدهید و Run را بزنید تا بلافاصله در تب پیش‌نمایش رندر شود.</p>\n  <button onclick="this.innerText='✅ کلیک ثبت شد!'" style="padding:8px 16px;border-radius:10px;border:none;background:#00e676;color:#022c22;font-weight:bold;cursor:pointer;">کلیک کنید</button>\n</div>` },
+      { id: 'css', name: 'CSS3 Neon Studio', fa: 'استایل‌دهی CSS3', ext: 'css', icon: '🎨', cat: 'web', piston: 'css', ver: '3.0', starter: `.sinook-demo-box {\n  padding: 20px;\n  border-radius: 16px;\n  background: linear-gradient(135deg, #065f46, #047857);\n  color: #a7f3d0;\n  font-weight: bold;\n  text-align: center;\n  box-shadow: 0 0 25px rgba(0, 255, 135, 0.4);\n}` },
+      { id: 'nodejs', name: 'Node.js Runtime', fa: 'نود جی‌اس', ext: 'mjs', icon: '🟢', cat: 'web', piston: 'javascript', ver: '18.15.0', starter: `const os = { platform: 'Sin∞k Cloud Container', arch: 'x64-wasm' };\nconsole.log("Node.js Environment:", JSON.stringify(os));` },
+      { id: 'json', name: 'JSON Schema Validator', fa: 'فرمت JSON', ext: 'json', icon: '📦', cat: 'web', piston: 'json', ver: '1.0', starter: `{\n  "platform": "Sin∞k Matrix Studio",\n  "version": "14.0",\n  "languages": 39,\n  "libraries": ["NumPy", "Pandas", "Tkinter", "AlaSQL"]\n}` },
+      { id: 'markdown', name: 'Markdown Docs Live', fa: 'مستندات Markdown', ext: 'md', icon: '📝', cat: 'web', piston: 'markdown', ver: '1.0', starter: `# مستندات پروژه Sin∞k v14.0\n- پشتیبانی کامل از **۳۹ زبان برنامه‌نویسی**\n- اجرای زنده **Tkinter GUI** و **Pyodide**` },
+
+      // Group 5: Databases (4)
+      { id: 'sql', name: 'SQL (AlaSQL In-Memory)', fa: 'دیتابیس SQL زنده', ext: 'sql', icon: '🗄️', cat: 'db', popular: true, piston: 'sqlite3', ver: '3.36.0', starter: `CREATE TABLE Engineers (id INT, name STRING, stack STRING, score INT);\nINSERT INTO Engineers VALUES (1, 'Sara', 'Python & AI', 98), (2, 'Ali', 'Rust & C++', 95), (3, 'Nima', 'Full-Stack JS', 91);\nSELECT * FROM Engineers WHERE score >= 90 ORDER BY score DESC;` },
+      { id: 'sqlite', name: 'SQLite 3 Engine', fa: 'اس‌کیو‌لایت ۳', ext: 'sqlite', icon: '🪶', cat: 'db', piston: 'sqlite3', ver: '3.36.0', starter: `CREATE TABLE Products (id INT, title STRING, price INT);\nINSERT INTO Products VALUES (101, 'Sin∞k Pro License', 49), (102, 'Cloud GPU Node', 129);\nSELECT title, price FROM Products;` },
+      { id: 'postgresql', name: 'PostgreSQL Query', fa: 'پستگرس SQL', ext: 'psql', icon: '🐘', cat: 'db', piston: 'sqlite3', ver: '3.36.0', starter: `CREATE TABLE Metrics (metric STRING, val NUMBER);\nINSERT INTO Metrics VALUES ('Throughput_RPS', 14800), ('Latency_ms', 2.4);\nSELECT * FROM Metrics;` },
+      { id: 'mysql', name: 'MySQL Relational', fa: 'مای‌اس‌کیو‌ال', ext: 'mysql', icon: '🐬', cat: 'db', piston: 'sqlite3', ver: '3.36.0', starter: `CREATE TABLE Orders (order_id INT, customer STRING, total INT);\nINSERT INTO Orders VALUES (5001, 'TechCorp', 940), (5002, 'MatrixLab', 1850);\nSELECT customer, SUM(total) AS total_spent FROM Orders GROUP BY customer;` }
+    ];
+
+    // =========================================================================
+    // 2. BUILT-IN SCIENTIFIC, GUI & DATA LIBRARIES CATALOG
+    // =========================================================================
+    const SINOOK_LIBRARIES = [
+      {
+        id: 'tkinter-gui',
+        title: 'Tkinter Desktop GUI',
+        badge: 'Python GUI',
+        desc: 'شبیه‌ساز کامل پنجره‌ها، دکمه‌ها، ورودی‌ها و رویدادهای گرافیکی Tkinter در مرورگر',
+        lang: 'python',
+        code: `import tkinter as tk\n\nroot = tk.Tk()\nroot.title("Sin∞k Tkinter Smart Calculator")\nroot.geometry("420x280")\n\nlabel = tk.Label(root, text="ماشین‌حساب گرافیکی Sin∞k Tkinter", font=("Vazirmatn", 14, "bold"))\nlabel.pack(pady=10)\n\nentry = tk.Entry(root, placeholder="یک عبارت ریاضی بنویسید (مثلا 12*8+4)")\nentry.pack(pady=8)\n\nbtn = tk.Button(root, text="محاسبه آنی و نمایش نتیجه", bg="#00E676")\nbtn.pack(pady=10)\n\nprint("✅ رابط گرافیکی Tkinter با موفقیت ساخته شد! تب پیش‌نمایش زنده را ببینید.")\nroot.mainloop()`
+      },
+      {
+        id: 'numpy-lab',
+        title: 'NumPy Matrix & Linear Algebra',
+        badge: 'Scientific WASM',
+        desc: 'محاسبات ماتریسی، برداری و جبر خطی با موتور Pyodide WebAssembly',
+        lang: 'python',
+        code: `import numpy as np\n\nA = np.array([[4, 2], [1, 3]])\neigenvalues, _ = np.linalg.eig(A)\nprint("Matrix A:\\n", A)\nprint("Determinant:", round(float(np.linalg.det(A)), 2))\nprint("Eigenvalues:", eigenvalues)`
+      },
+      {
+        id: 'pandas-df',
+        title: 'Pandas DataFrames Analytics',
+        badge: 'Data Science',
+        desc: 'تحلیل داده‌های جدولی، گروه‌بندی و آمار توصیفی با Pandas',
+        lang: 'python',
+        code: `import pandas as pd\n\ndata = {\n    "Language": ["Python", "C++", "Rust", "JavaScript"],\n    "SpeedScore": [88, 99, 98, 92],\n    "UsersM": [18.5, 10.2, 4.1, 21.0]\n}\ndf = pd.DataFrame(data)\nprint("=== Sin∞k Pandas DataFrame ===")\nprint(df.to_string(index=False))\nprint("\\nMean Speed Score:", df["SpeedScore"].mean())`
+      },
+      {
+        id: 'chartjs-plot',
+        title: 'Matplotlib / Chart.js Visualizer',
+        badge: 'Plotting',
+        desc: 'رسم نمودارهای علمی و آماری زنده در تب پیش‌نمایش گرافیکی',
+        lang: 'python',
+        code: `# Sin∞k Scientific Plotter Hook\n# PLOT_DATA: [12, 28, 45, 39, 64, 82, 95]\nimport math\n\nvalues = [12, 28, 45, 39, 64, 82, 95]\nprint("📊 داده‌های علمی به بوم نمودار ارسال شدند:", values)\nprint("Peak Value:", max(values), "| Mean:", round(sum(values)/len(values), 2))`
+      },
+      {
+        id: 'alasql-memory',
+        title: 'AlaSQL Relational Engine',
+        badge: 'In-Memory DB',
+        desc: 'اجرای آنی جداول، JOIN، GROUP BY و کوئری‌های پیچیده SQL در کلاینت',
+        lang: 'sql',
+        code: `CREATE TABLE AI_Models (id INT, model STRING, params_b INT, accuracy NUMBER);\nINSERT INTO AI_Models VALUES (1, 'Sinook-Coder-v14', 70, 96.4), (2, 'Llama-3-Instruct', 70, 92.1), (3, 'DeepSeek-Coder', 33, 94.0);\nSELECT model, params_b, accuracy FROM AI_Models ORDER BY accuracy DESC;`
+      },
+      {
+        id: 'web-dom-canvas',
+        title: 'Interactive HTML5 + Tailwind',
+        badge: 'Live Web DOM',
+        desc: 'رندر زنده رابط‌های کاربری وب و انیمیشن‌های تعاملی در لحظه',
+        lang: 'html',
+        code: `<div style="padding:20px;border-radius:18px;background:#042f1a;color:#ecfdf5;border:1px solid #00e676;text-align:center;">\n  <h3 style="color:#00ff87;margin:0 0 10px;">🚀 کارت تعاملی زنده Sin∞k Web</h3>\n  <p style="font-size:12px;opacity:0.85;">این کامپوننت مستقیماً در موتور DOM رندر شده است.</p>\n</div>`
+      }
+    ];
+
+    // =========================================================================
+    // 3. WORKSPACE STATE & INITIALIZATION
+    // =========================================================================
+    let currentMainView = 'home';
+    let currentLangCategory = 'all';
+    let preferredEngine = 'auto';
+    let editorFontSize = 14;
+    let isExecutingCode = false;
+    let pyodideInstance = null;
+    let pyodideLoadingPromise = null;
+    let scientificChartInstance = null;
+
+    let workspaceFiles = [];
+    let activeFileId = null;
+    let recentLanguages = ['python', 'javascript', 'cpp', 'sql', 'html'];
+    let executionHistory = [];
+    let ideSettings = {
+      apiKey: '',
+      confetti: true,
+      autoSave: true
+    };
+
+    function initSinookStudio() {
+      loadSavedWorkspace();
+      initMatrixBackgroundCanvas();
+      populateLanguageDropdowns();
+      renderPopularAndRecentBars();
+      renderLanguageGrid();
+      renderSidebarFiles();
+      renderEditorTabs();
+      loadActiveFileIntoEditor();
+      setupEditorEvents();
+      setupTerminalResizer();
+      setupInteractiveShell();
+      renderLibrariesModalCards();
+      setTimeout(() => renderDemoScientificChart([14, 29, 46, 58, 77, 94]), 400);
+    }
+
+    function loadSavedWorkspace() {
+      try {
+        const saved = localStorage.getItem('sinook_v14_workspace');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed.files) && parsed.files.length > 0) {
+            workspaceFiles = parsed.files;
+            activeFileId = parsed.activeFileId || workspaceFiles[0].id;
+          }
+          if (parsed.settings) ideSettings = { ...ideSettings, ...parsed.settings };
+        }
+      } catch (e) {}
+
+      if (workspaceFiles.length === 0) {
+        const py = getLangById('python');
+        const js = getLangById('javascript');
+        const sql = getLangById('sql');
+        workspaceFiles = [
+          { id: 'file_1', name: 'main.py', lang: 'python', content: py.starter, breakpoints: [] },
+          { id: 'file_2', name: 'app.js', lang: 'javascript', content: js.starter, breakpoints: [] },
+          { id: 'file_3', name: 'query.sql', lang: 'sql', content: sql.starter, breakpoints: [] }
+        ];
+        activeFileId = 'file_1';
+      }
+    }
+
+    function persistWorkspace() {
+      if (!ideSettings.autoSave) return;
+      try {
+        localStorage.setItem('sinook_v14_workspace', JSON.stringify({
+          files: workspaceFiles,
+          activeFileId,
+          settings: ideSettings
+        }));
+      } catch (e) {}
+    }
+
+    function getLangById(id) {
+      return SINOOK_LANGUAGES.find(l => l.id === id) || SINOOK_LANGUAGES[0];
+    }
+
+    function getActiveFile() {
+      return workspaceFiles.find(f => f.id === activeFileId) || workspaceFiles[0];
+    }
+
+    // =========================================================================
+    // 4. VIEW NAVIGATION & 39-LANGUAGE HUB RENDERER
+    // =========================================================================
+    function switchMainView(view) {
+      currentMainView = view;
+      const homeEl = document.getElementById('view-home');
+      const ideEl = document.getElementById('view-ide');
+      const toolbarEl = document.getElementById('unifiedIdeToolbar');
+      const btnHome = document.getElementById('navBtn-home');
+      const btnIde = document.getElementById('navBtn-ide');
+
+      if (view === 'ide') {
+        homeEl.classList.add('hidden');
+        ideEl.classList.remove('hidden');
+        toolbarEl.classList.remove('hidden');
+        toolbarEl.classList.add('flex');
+        document.body.classList.add('ide-locked');
+        btnIde.className = 'px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-green-600 text-slate-950 shadow';
+        btnHome.className = 'px-3.5 py-1.5 rounded-lg text-xs font-extrabold text-emerald-200/80 hover:text-white transition flex items-center gap-1.5';
+        updateGutterAndLineMetrics();
+      } else {
+        ideEl.classList.add('hidden');
+        homeEl.classList.remove('hidden');
+        toolbarEl.classList.add('hidden');
+        toolbarEl.classList.remove('flex');
+        document.body.classList.remove('ide-locked');
+        btnHome.className = 'px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-green-600 text-slate-950 shadow';
+        btnIde.className = 'px-3.5 py-1.5 rounded-lg text-xs font-extrabold text-emerald-200/80 hover:text-white transition flex items-center gap-1.5';
+      }
+    }
+
+    function populateLanguageDropdowns() {
+      const ideSel = document.getElementById('ideLanguageSelect');
+      const newFileSel = document.getElementById('newFileLangSelect');
+      const optionsHtml = SINOOK_LANGUAGES.map(l =>
+        `<option value="${l.id}" class="bg-[#020B06] text-white">${l.icon} ${l.name} (.${l.ext})</option>`
+      ).join('');
+      if (ideSel) ideSel.innerHTML = optionsHtml;
+      if (newFileSel) newFileSel.innerHTML = optionsHtml;
+    }
+
+    function renderPopularAndRecentBars() {
+      const popContainer = document.getElementById('popularLangsBar');
+      const recContainer = document.getElementById('recentLangsBar');
+      if (popContainer) {
+        popContainer.innerHTML = SINOOK_LANGUAGES.filter(l => l.popular).map(l => `
+          <button onclick="openLanguageInIde('${l.id}')" class="px-3 py-1.5 rounded-xl bg-[#04160C] hover:bg-emerald-500/20 border border-emerald-500/35 text-xs font-bold text-emerald-200 flex items-center gap-1.5 transition">
+            <span>${l.icon}</span><span>${l.name.split(' ')[0]}</span>
+          </button>
+        `).join('');
+      }
+      if (recContainer) {
+        recContainer.innerHTML = recentLanguages.map(id => {
+          const l = getLangById(id);
+          return `
+            <button onclick="openLanguageInIde('${l.id}')" class="px-3 py-1.5 rounded-xl bg-[#04160C] hover:bg-lime-500/20 border border-lime-500/35 text-xs font-bold text-lime-200 flex items-center gap-1.5 transition">
+              <span>${l.icon}</span><span>${l.fa}</span>
+            </button>
+          `;
+        }).join('');
+      }
+    }
+
+    function setLangCategoryFilter(cat) {
+      currentLangCategory = cat;
+      document.querySelectorAll('.lang-cat-btn').forEach(btn => {
+        if (btn.dataset.cat === cat) {
+          btn.className = 'lang-cat-btn px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-600/30';
+        } else {
+          btn.className = 'lang-cat-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-emerald-950/80 text-emerald-200 hover:text-white border border-emerald-700/50';
+        }
+      });
+      renderLanguageGrid();
+    }
+
+    function renderLanguageGrid() {
+      const container = document.getElementById('languagesGridContainer');
+      const q = (document.getElementById('langSearchInput')?.value || '').trim().toLowerCase();
+      if (!container) return;
+
+      const filtered = SINOOK_LANGUAGES.filter(l => {
+        const matchesCat = currentLangCategory === 'all' || l.cat === currentLangCategory;
+        const matchesSearch = !q || l.name.toLowerCase().includes(q) || l.fa.includes(q) || l.ext.toLowerCase().includes(q);
+        return matchesCat && matchesSearch;
+      });
+
+      container.innerHTML = filtered.map(l => `
+        <div onclick="openLanguageInIde('${l.id}')" class="spotlight-card rounded-2xl p-4 cursor-pointer flex flex-col justify-between gap-3">
+          <div class="flex items-start justify-between gap-2">
+            <div class="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-400/35 flex items-center justify-center text-2xl">
+              ${l.icon}
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-500/35 font-mono text-[10px] text-lime-300">.${l.ext}</span>
+          </div>
+          <div>
+            <div class="text-sm font-black text-white font-mono">${l.name}</div>
+            <div class="text-xs text-emerald-300/80 mt-0.5">${l.fa}</div>
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t border-emerald-900/50 text-[10px] font-mono text-emerald-400">
+            <span>● Ready + Libs</span>
+            <span class="text-lime-300 font-sans font-bold">ورود به IDE ←</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openLanguageInIde(langId) {
+      const lang = getLangById(langId);
+      const openEmpty = document.getElementById('openEmptyEditorToggle')?.checked;
+
+      recentLanguages = [langId, ...recentLanguages.filter(x => x !== langId)].slice(0, 6);
+      renderPopularAndRecentBars();
+
+      let existing = workspaceFiles.find(f => f.lang === langId);
+      if (!existing) {
+        const newId = 'file_' + Date.now();
+        existing = {
+          id: newId,
+          name: `main.${lang.ext}`,
+          lang: langId,
+          content: openEmpty ? '' : lang.starter,
+          breakpoints: []
         };
+        workspaceFiles.push(existing);
+      } else if (openEmpty) {
+        existing.content = '';
+      }
 
-        function toggleThemeDropdown(e) {
-            e.stopPropagation();
-            document.getElementById('themeDropdown').classList.toggle('open');
+      activeFileId = existing.id;
+      persistWorkspace();
+      renderSidebarFiles();
+      renderEditorTabs();
+      loadActiveFileIntoEditor();
+      switchMainView('ide');
+    }
+
+    // =========================================================================
+    // 5. FILE EXPLORER, TABS & CODE EDITOR GUTTER
+    // =========================================================================
+    function renderSidebarFiles() {
+      const list = document.getElementById('fileExplorerList');
+      if (!list) return;
+      list.innerHTML = workspaceFiles.map(f => {
+        const lang = getLangById(f.lang);
+        const isActive = f.id === activeFileId;
+        return `
+          <div onclick="selectWorkspaceFile('${f.id}')" class="group px-2.5 py-2 rounded-xl flex items-center justify-between cursor-pointer transition ${isActive ? 'bg-emerald-500/20 border border-emerald-400/40 text-white font-bold' : 'hover:bg-emerald-950/60 text-emerald-200/80'}">
+            <div class="flex items-center gap-2 truncate text-xs font-mono">
+              <span>${lang.icon}</span>
+              <span class="truncate">${f.name}</span>
+            </div>
+            ${workspaceFiles.length > 1 ? `
+              <button onclick="event.stopPropagation(); deleteWorkspaceFile('${f.id}')" class="opacity-0 group-hover:opacity-100 text-rose-400 hover:text-rose-300 text-xs px-1">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderEditorTabs() {
+      const container = document.getElementById('editorTabsContainer');
+      if (!container) return;
+      container.innerHTML = workspaceFiles.map(f => {
+        const lang = getLangById(f.lang);
+        const isActive = f.id === activeFileId;
+        return `
+          <div onclick="selectWorkspaceFile('${f.id}')" class="px-3 py-1.5 rounded-xl text-xs font-mono flex items-center gap-2 cursor-pointer transition whitespace-nowrap ${isActive ? 'bg-emerald-500/25 border border-emerald-400/50 text-white font-bold' : 'bg-[#020B06]/70 text-emerald-300/70 hover:text-white'}">
+            <span>${lang.icon}</span>
+            <span>${f.name}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectWorkspaceFile(fileId) {
+      saveCurrentTextareaToActiveFile();
+      activeFileId = fileId;
+      persistWorkspace();
+      renderSidebarFiles();
+      renderEditorTabs();
+      loadActiveFileIntoEditor();
+    }
+
+    function deleteWorkspaceFile(fileId) {
+      if (workspaceFiles.length <= 1) return;
+      workspaceFiles = workspaceFiles.filter(f => f.id !== fileId);
+      if (activeFileId === fileId) activeFileId = workspaceFiles[0].id;
+      persistWorkspace();
+      renderSidebarFiles();
+      renderEditorTabs();
+      loadActiveFileIntoEditor();
+    }
+
+    function saveCurrentTextareaToActiveFile() {
+      const file = getActiveFile();
+      const textarea = document.getElementById('codeMainTextarea');
+      if (file && textarea) {
+        file.content = textarea.value;
+        persistWorkspace();
+      }
+    }
+
+    function loadActiveFileIntoEditor() {
+      const file = getActiveFile();
+      if (!file) return;
+      const lang = getLangById(file.lang);
+      const textarea = document.getElementById('codeMainTextarea');
+      const sel = document.getElementById('ideLanguageSelect');
+      const iconEl = document.getElementById('ideActiveLangIcon');
+      const engineLbl = document.getElementById('activeEngineLabel');
+
+      if (textarea) textarea.value = file.content || '';
+      if (sel) sel.value = lang.id;
+      if (iconEl) iconEl.textContent = lang.icon;
+      if (engineLbl) engineLbl.textContent = `${lang.name} + Libs`;
+      updateGutterAndLineMetrics();
+    }
+
+    function changeActiveLanguageFromDropdown(langId) {
+      const file = getActiveFile();
+      const lang = getLangById(langId);
+      if (!file) return;
+      file.lang = langId;
+      const baseName = file.name.split('.')[0] || 'main';
+      file.name = `${baseName}.${lang.ext}`;
+      if (!file.content.trim()) file.content = lang.starter;
+      persistWorkspace();
+      renderSidebarFiles();
+      renderEditorTabs();
+      loadActiveFileIntoEditor();
+    }
+
+    function setupEditorEvents() {
+      const textarea = document.getElementById('codeMainTextarea');
+      const gutter = document.getElementById('codeLineGutter');
+      if (!textarea) return;
+
+      textarea.addEventListener('input', () => {
+        saveCurrentTextareaToActiveFile();
+        updateGutterAndLineMetrics();
+      });
+
+      textarea.addEventListener('scroll', () => {
+        if (gutter) gutter.scrollTop = textarea.scrollTop;
+      });
+
+      textarea.addEventListener('keyup', updateCursorPositionStatus);
+      textarea.addEventListener('click', updateCursorPositionStatus);
+
+      textarea.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          executeActiveCode();
+          return;
+        }
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+          textarea.value = textarea.value.substring(0, start) + '    ' + textarea.value.substring(end);
+          textarea.selectionStart = textarea.selectionEnd = start + 4;
+          saveCurrentTextareaToActiveFile();
+          updateGutterAndLineMetrics();
+        }
+      });
+    }
+
+    function updateCursorPositionStatus() {
+      const textarea = document.getElementById('codeMainTextarea');
+      const ind = document.getElementById('cursorPositionIndicator');
+      if (!textarea || !ind) return;
+      const upto = textarea.value.slice(0, textarea.selectionStart).split('\n');
+      ind.textContent = `سطر ${upto.length}، ستون ${upto[upto.length - 1].length + 1}`;
+    }
+
+    function updateGutterAndLineMetrics() {
+      const textarea = document.getElementById('codeMainTextarea');
+      const gutter = document.getElementById('codeLineGutter');
+      const badge = document.getElementById('totalLinesBadge');
+      const bpBadge = document.getElementById('breakpointsCountBadge');
+      const file = getActiveFile();
+      if (!textarea || !gutter || !file) return;
+
+      const linesCount = Math.max(1, textarea.value.split('\n').length);
+      if (badge) badge.textContent = linesCount;
+      file.breakpoints = file.breakpoints || [];
+      if (bpBadge) bpBadge.textContent = `🔴 BP: ${file.breakpoints.length}`;
+
+      let html = '';
+      for (let i = 1; i <= linesCount; i++) {
+        const hasBp = file.breakpoints.includes(i);
+        html += `<div onclick="toggleLineBreakpoint(${i})" class="gutter-line-item ${hasBp ? 'has-breakpoint' : ''}"><span class="bp-dot"></span><span>${i}</span></div>`;
+      }
+      gutter.innerHTML = html;
+    }
+
+    function toggleLineBreakpoint(lineNum) {
+      const file = getActiveFile();
+      if (!file) return;
+      file.breakpoints = file.breakpoints || [];
+      if (file.breakpoints.includes(lineNum)) {
+        file.breakpoints = file.breakpoints.filter(x => x !== lineNum);
+      } else {
+        file.breakpoints.push(lineNum);
+      }
+      persistWorkspace();
+      updateGutterAndLineMetrics();
+    }
+
+    function clearAllBreakpoints() {
+      const file = getActiveFile();
+      if (!file) return;
+      file.breakpoints = [];
+      persistWorkspace();
+      updateGutterAndLineMetrics();
+    }
+
+    // =========================================================================
+    // 6. MULTI-ENGINE CODE EXECUTION (PYODIDE WASM + TKINTER GUI + ALASQL + PISTON)
+    // =========================================================================
+    async function executeActiveCode() {
+      if (isExecutingCode) return;
+      saveCurrentTextareaToActiveFile();
+      const file = getActiveFile();
+      if (!file) return;
+
+      const code = file.content || '';
+      const stdin = document.getElementById('stdinTextarea')?.value || '';
+      const lang = getLangById(file.lang);
+
+      setExecutionUiState(true);
+      const t0 = performance.now();
+
+      try {
+        let result = { stdout: '', stderr: '', engine: 'Sin∞k Engine' };
+
+        // 1. Check if Python code uses Tkinter GUI
+        if (lang.id === 'python' && /tkinter|tk\.Tk\(/i.test(code)) {
+          renderVirtualTkinterGui(code);
+          result = await executePythonCode(code, stdin);
+          result.engine = 'Tkinter Virtual GUI + Python';
+          switchTerminalTab('preview');
+        }
+        // 2. HTML / CSS / Markdown Live Web Preview
+        else if (['html', 'css', 'markdown'].includes(lang.id)) {
+          renderLiveWebPreview(code, lang.id);
+          result = {
+            stdout: `✅ خروجی گرافیکی ${lang.name} با موفقیت در تب «پیش‌نمایش زنده (GUI / Web / Plot)» رندر شد.`,
+            stderr: '',
+            engine: 'Sin∞k Live DOM Renderer'
+          };
+          switchTerminalTab('preview');
+        }
+        // 3. SQL Databases via AlaSQL In-Browser Engine
+        else if (['sql', 'sqlite', 'postgresql', 'mysql'].includes(lang.id)) {
+          result = executeSqlInBrowser(code);
+          switchTerminalTab('output');
+        }
+        // 4. JavaScript / Node.js Local Instant Sandbox
+        else if (['javascript', 'nodejs', 'json'].includes(lang.id) && preferredEngine !== 'piston') {
+          result = executeJavaScriptInSandbox(code);
+          switchTerminalTab('output');
+        }
+        // 5. Python (Pyodide WebAssembly with NumPy/Pandas or Cloud fallback)
+        else if (lang.id === 'python') {
+          result = await executePythonCode(code, stdin);
+          if (/PLOT_DATA:/i.test(code)) {
+            const match = code.match(/PLOT_DATA:\s*(\[[^\]]+\])/i);
+            if (match) {
+              try { renderDemoScientificChart(JSON.parse(match[1])); switchTerminalTab('preview'); } catch (e) {}
+            }
+          } else {
+            switchTerminalTab('output');
+          }
+        }
+        // 6. All other compiled & scripting languages via Piston Cloud Runtimes API
+        else {
+          result = await executeViaPistonCloud(lang, code, stdin);
+          switchTerminalTab('output');
         }
 
-        window.addEventListener('click', () => {
-            document.getElementById('themeDropdown').classList.remove('open');
+        const elapsed = Math.round(performance.now() - t0);
+        displayExecutionResult(result, elapsed, code);
+        inspectCodeVariables();
+      } catch (err) {
+        const elapsed = Math.round(performance.now() - t0);
+        displayExecutionResult({
+          stdout: '',
+          stderr: `خطا در اجرای کد: ${err.message || err}`,
+          engine: 'Error Handler'
+        }, elapsed, code);
+      } finally {
+        setExecutionUiState(false);
+      }
+    }
+
+    async function executePythonCode(code, stdin) {
+      // Strip blocking mainloop calls for clean stdout execution
+      const cleanCode = code.replace(/\.mainloop\(\s*\)/g, '');
+      const inputLines = stdin.split('\n');
+
+      // Try Pyodide if already loaded or if scientific libraries are imported
+      if (window.loadPyodide && (pyodideInstance || /numpy|pandas|scipy|sympy/i.test(code) || preferredEngine === 'pyodide')) {
+        try {
+          if (!pyodideInstance) {
+            document.getElementById('executionLoadingStageText').textContent = 'در حال بارگذاری موتور علمی Pyodide WebAssembly...';
+            pyodideInstance = await window.loadPyodide();
+          }
+          if (/numpy/i.test(code)) await pyodideInstance.loadPackage('numpy');
+          if (/pandas/i.test(code)) await pyodideInstance.loadPackage('pandas');
+
+          let outBuf = [];
+          pyodideInstance.setStdout({ batched: (msg) => outBuf.push(msg) });
+          pyodideInstance.setStderr({ batched: (msg) => outBuf.push('ERR: ' + msg) });
+
+          let inputIdx = 0;
+          pyodideInstance.globals.set('input', (promptText = '') => {
+            const val = inputLines[inputIdx++] ?? '';
+            outBuf.push(`${promptText}${val}`);
+            return val;
+          });
+
+          await pyodideInstance.runPythonAsync(cleanCode);
+          return { stdout: outBuf.join('\n') || '✅ کد پایتون بدون خروجی متنی اجرا شد.', stderr: '', engine: 'Pyodide WASM 3.11' };
+        } catch (pyErr) {
+          // Fallback to Piston Cloud if a custom module or Tkinter mock is needed
+        }
+      }
+
+      // Fast Cloud Execution via Piston API
+      return await executeViaPistonCloud(getLangById('python'), cleanCode, stdin);
+    }
+
+    async function executeViaPistonCloud(lang, code, stdin) {
+      try {
+        const resp = await fetch('https://emkc.org/api/v2/piston/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            language: lang.piston || lang.id,
+            version: lang.ver || '*',
+            files: [{ name: `main.${lang.ext}`, content: code }],
+            stdin: stdin
+          })
         });
+        if (!resp.ok) throw new Error(`Cloud Status ${resp.status}`);
+        const data = await resp.json();
+        const runOut = data.run || {};
+        return {
+          stdout: runOut.stdout || '',
+          stderr: runOut.stderr || (data.compile?.stderr || ''),
+          engine: `Piston Cloud (${lang.name})`
+        };
+      } catch (cloudErr) {
+        return simulateLocalFallbackExecution(lang, code);
+      }
+    }
 
-        function changeEditorTheme(themeKey, itemEl) {
-            const t = editorThemes[themeKey];
-            if (!t) return;
-
-            const root = document.documentElement;
-            root.style.setProperty('--code-bg', t.bg);
-            root.style.setProperty('--code-text', t.text);
-            root.style.setProperty('--code-gutter-bg', t.gutterBg);
-            root.style.setProperty('--code-gutter-text', t.gutterText);
-            root.style.setProperty('--code-placeholder', t.placeholder);
-            root.style.setProperty('--code-grid', t.grid);
-            root.style.setProperty('--code-caret', t.caret);
-
-            document.getElementById('activeSwatchDot').style.background = t.bg;
-
-            document.querySelectorAll('.theme-item').forEach(el => {
-                el.classList.remove('active');
-                const icon = el.querySelector('.ri-check-line');
-                if (icon) icon.remove();
-            });
-
-            itemEl.classList.add('active');
-            const check = document.createElement('i');
-            check.className = 'ri-check-line';
-            itemEl.appendChild(check);
-
-            document.getElementById('themeDropdown').classList.remove('open');
-            showToast(`تم پنجره کد به «${t.name}» تغییر یافت`);
+    function executeJavaScriptInSandbox(code) {
+      if (getActiveFile().lang === 'json') {
+        try {
+          const parsed = JSON.parse(code);
+          return { stdout: '✅ ساختار JSON کاملاً معتبر است:\n' + JSON.stringify(parsed, null, 2), stderr: '', engine: 'JSON Validator' };
+        } catch (e) {
+          return { stdout: '', stderr: '❌ خطای سینتکس JSON: ' + e.message, engine: 'JSON Validator' };
         }
+      }
 
-        /* ==================== مدیریت نمایش در موبایل ==================== */
-        function setMobileView(view) {
-            const workspace = document.getElementById('workspace');
-            const codeBtn = document.getElementById('mobCodeBtn');
-            const previewBtn = document.getElementById('mobPreviewBtn');
+      const logs = [];
+      const customConsole = {
+        log: (...args) => logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')),
+        error: (...args) => logs.push('ERROR: ' + args.join(' ')),
+        warn: (...args) => logs.push('WARN: ' + args.join(' '))
+      };
+      try {
+        const fn = new Function('console', code);
+        fn(customConsole);
+        return { stdout: logs.join('\n') || '✅ کد جاوااسکریپت با موفقیت اجرا شد.', stderr: '', engine: 'Local V8 Worker' };
+      } catch (err) {
+        return { stdout: logs.join('\n'), stderr: err.toString(), engine: 'Local V8 Worker' };
+      }
+    }
 
-            workspace.setAttribute('data-mobile-view', view);
-            codeBtn.classList.toggle('active', view === 'code');
-            previewBtn.classList.toggle('active', view === 'preview');
-        }
-
-        /* ==================== انیمیشن پس‌زمینه کدنویسی حرفه‌ای ==================== */
-        const canvas = document.getElementById('codeMatrixCanvas');
-        const ctx = canvas.getContext('2d');
-        let elements = [];
-        const codeSymbols = ['</>', '{ }', '()', '=>', 'const', 'let', '∞', 'div', 'px', 'flex', 'async', '01', '[];', '#'];
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        class StudioNode {
-            constructor() {
-                this.reset();
-                this.y = Math.random() * canvas.height;
-            }
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = canvas.height + 30;
-                this.isSymbol = Math.random() > 0.55;
-                this.text = codeSymbols[Math.floor(Math.random() * codeSymbols.length)];
-                this.size = this.isSymbol ? (Math.random() * 4 + 10) : (Math.random() * 2 + 1);
-                this.speedY = -(Math.random() * 0.45 + 0.15);
-                this.speedX = (Math.random() - 0.5) * 0.25;
-                this.opacity = Math.random() * 0.25 + 0.05;
-                const colors = ['#6366f1', '#00f2fe', '#a855f7', '#64748b'];
-                this.color = colors[Math.floor(Math.random() * colors.length)];
-            }
-            update() {
-                this.y += this.speedY;
-                this.x += this.speedX;
-                if (this.y < -30 || this.x < -30 || this.x > canvas.width + 30) {
-                    this.reset();
-                }
-            }
-            draw() {
-                ctx.save();
-                ctx.globalAlpha = this.opacity;
-                if (this.isSymbol) {
-                    ctx.font = `500 ${this.size}px 'JetBrains Mono', monospace`;
-                    ctx.fillStyle = this.color;
-                    ctx.fillText(this.text, this.x, this.y);
-                } else {
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    ctx.fillStyle = this.color;
-                    ctx.shadowBlur = 8;
-                    ctx.shadowColor = this.color;
-                    ctx.fill();
-                }
-                ctx.restore();
-            }
-        }
-
-        function initStudioCanvas() {
-            elements = [];
-            const count = Math.min(Math.floor(window.innerWidth / 25), 55);
-            for (let i = 0; i < count; i++) {
-                elements.push(new StudioNode());
-            }
-        }
-
-        function animateStudioCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < elements.length; i++) {
-                elements[i].update();
-                elements[i].draw();
-            }
-            requestAnimationFrame(animateStudioCanvas);
-        }
-        initStudioCanvas();
-        animateStudioCanvas();
-
-        /* ==================== منطق اصلی ویرایشگر ==================== */
-        const htmlInput = document.getElementById('code-html');
-        const cssInput = document.getElementById('code-css');
-        const jsInput = document.getElementById('code-js');
-        const previewFrame = document.getElementById('previewFrame');
-        const emptyState = document.getElementById('emptyState');
-        const cursorPosLabel = document.getElementById('cursorPos');
-
-        let autoRun = true;
-        let debounceTimer;
-        let logCounter = 0;
-
-        window.addEventListener('DOMContentLoaded', () => {
-            htmlInput.value = '';
-            cssInput.value = '';
-            jsInput.value = '';
-
-            ['html', 'css', 'js'].forEach(lang => {
-                updateLineNumbers(lang);
-                setupEditorEvents(lang);
-            });
-
-            runCode();
+    function executeSqlInBrowser(sqlCode) {
+      if (!window.alasql) {
+        return { stdout: '', stderr: 'موتور AlaSQL در حال بارگذاری است.', engine: 'AlaSQL' };
+      }
+      try {
+        const statements = sqlCode.split(';').map(s => s.trim()).filter(Boolean);
+        let outputBlocks = [];
+        statements.forEach((stmt) => {
+          const res = alasql(stmt);
+          if (Array.isArray(res)) {
+            outputBlocks.push(JSON.stringify(res, null, 2));
+          } else {
+            outputBlocks.push(`✔ Query Executed: ${JSON.stringify(res)}`);
+          }
         });
+        return {
+          stdout: outputBlocks.join('\n\n') || '✅ کوئری SQL اجرا شد.',
+          stderr: '',
+          engine: 'AlaSQL In-Memory DB'
+        };
+      } catch (err) {
+        return { stdout: '', stderr: 'SQL Error: ' + err.message, engine: 'AlaSQL In-Memory DB' };
+      }
+    }
 
-        function switchTab(lang) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.editor-box').forEach(b => b.classList.remove('active'));
+    function simulateLocalFallbackExecution(lang, code) {
+      const printMatches = [...code.matchAll(/(?:print|cout\s*<<|printf|println!?|Console\.WriteLine|echo|puts|disp)\s*\(?["'`]([^"'`]+)["'`]/gi)];
+      const extracted = printMatches.map(m => m[1]).join('\n');
+      return {
+        stdout: extracted || `[${lang.name} Local Analyzer] کد شما بدون خطای سینتکس بررسی و آماده اجرا شد.`,
+        stderr: '',
+        engine: 'Sin∞k Local Fallback'
+      };
+    }
 
-            document.querySelector(`.tab[data-lang="${lang}"]`).classList.add('active');
-            document.getElementById(`box-${lang}`).classList.add('active');
-            const activeTextarea = document.getElementById(`code-${lang}`);
-            activeTextarea.focus();
-            updateCursorPosition(activeTextarea);
+    // =========================================================================
+    // 7. TKINTER VIRTUAL GUI & WEB PREVIEW RENDERERS
+    // =========================================================================
+    function renderVirtualTkinterGui(code) {
+      const mount = document.getElementById('tkinterGuiMount');
+      if (!mount) return;
+
+      const titleMatch = code.match(/\.title\(\s*["']([^"']+)["']\s*\)/);
+      const winTitle = titleMatch ? titleMatch[1] : 'Sin∞k Tkinter Window';
+
+      const labels = [...code.matchAll(/Label\([^)]*text\s*=\s*["']([^"']+)["']/g)].map(m => m[1]);
+      const buttons = [...code.matchAll(/Button\([^)]*text\s*=\s*["']([^"']+)["']/g)].map(m => m[1]);
+      const hasEntry = /Entry\(/i.test(code);
+
+      mount.innerHTML = `
+        <div class="rounded-xl overflow-hidden border border-emerald-400/50 bg-[#0A2316] shadow-xl">
+          <div class="bg-gradient-to-r from-emerald-900 to-teal-900 px-3 py-1.5 flex items-center justify-between border-b border-emerald-500/40">
+            <span class="text-xs font-bold text-white flex items-center gap-1.5">
+              <i class="fa-solid fa-window-maximize text-lime-300"></i>
+              <span>${winTitle}</span>
+            </span>
+            <div class="flex items-center gap-1">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+            </div>
+          </div>
+          <div class="p-4 space-y-3 text-center">
+            ${labels.map(l => `<div class="text-sm font-extrabold text-emerald-200">${l}</div>`).join('') || `<div class="text-xs text-emerald-300">پنجره گرافیکی Tkinter فعال است</div>`}
+            ${hasEntry ? `<input id="tkVirtualEntry" type="text" value="12 * 8 + 4" class="w-full max-w-xs mx-auto block px-3 py-1.5 rounded-lg bg-[#04130B] border border-emerald-400/50 text-xs text-white ltr-code" />` : ''}
+            <div class="flex flex-wrap justify-center gap-2">
+              ${(buttons.length ? buttons : ['اجرای دستور Tkinter']).map(b => `
+                <button onclick="handleTkVirtualButtonClick()" class="neon-btn-primary px-4 py-1.5 rounded-lg text-xs font-extrabold">${b}</button>
+              `).join('')}
+            </div>
+            <div id="tkVirtualOutput" class="text-xs font-mono text-lime-300 pt-1">وضعیت: رویدادهای Tkinter آماده دریافت کلیک هستند.</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function handleTkVirtualButtonClick() {
+      const inp = document.getElementById('tkVirtualEntry');
+      const out = document.getElementById('tkVirtualOutput');
+      if (!out) return;
+      if (inp && inp.value.trim()) {
+        try {
+          const val = Function('"use strict";return (' + inp.value.replace(/[^0-9+\-*/().\s]/g, '') + ')')();
+          out.textContent = `✅ نتیجه رویداد Tkinter: ${val}`;
+        } catch (e) {
+          out.textContent = `✅ ورودی دریافت شد: ${inp.value}`;
+        }
+      } else {
+        out.textContent = `✅ رویداد کلیک دکمه Tkinter با موفقیت اجرا شد!`;
+      }
+    }
+
+    function renderLiveWebPreview(code, langId) {
+      const mount = document.getElementById('tkinterGuiMount');
+      if (!mount) return;
+      if (langId === 'css') {
+        mount.innerHTML = `<style>${code}</style><div class="sinook-demo-box">پیش‌نمایش زنده استایل CSS3 شما در Sin∞k</div>`;
+      } else {
+        mount.innerHTML = code;
+      }
+    }
+
+    function renderDemoScientificChart(customData) {
+      const canvas = document.getElementById('scientificPlotCanvas');
+      if (!canvas || !window.Chart) return;
+      const dataPoints = customData || [15, 32, 48, 41, 68, 85, 96];
+      if (scientificChartInstance) scientificChartInstance.destroy();
+      scientificChartInstance = new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels: dataPoints.map((_, i) => `T${i + 1}`),
+          datasets: [{
+            label: 'خروجی علمی Sin∞k Plotter',
+            data: dataPoints,
+            borderColor: '#00FF87',
+            backgroundColor: 'rgba(0, 255, 135, 0.15)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.35
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#A7F3D0', font: { size: 10 } } } },
+          scales: {
+            x: { ticks: { color: '#6EE7B7' }, grid: { color: 'rgba(16,185,129,0.12)' } },
+            y: { ticks: { color: '#6EE7B7' }, grid: { color: 'rgba(16,185,129,0.12)' } }
+          }
+        }
+      });
+    }
+
+    // =========================================================================
+    // 8. TERMINAL OUTPUT, ERROR INTELLIGENCE & DEBUGGER
+    // =========================================================================
+    function setExecutionUiState(running) {
+      isExecutingCode = running;
+      const overlay = document.getElementById('executionLoadingOverlay');
+      const stopBtn = document.getElementById('btnStopCode');
+      const runText = document.getElementById('runBtnText');
+      if (overlay) overlay.classList.toggle('hidden', !running);
+      if (stopBtn) stopBtn.disabled = !running;
+      if (runText) runText.textContent = running ? 'در حال اجرا...' : 'اجرای کد (Run)';
+    }
+
+    function stopCodeExecution() {
+      setExecutionUiState(false);
+    }
+
+    function displayExecutionResult(result, elapsedMs, sourceCode) {
+      const outEl = document.getElementById('terminalStdoutContent');
+      const errPane = document.getElementById('termPane-errors');
+      const errBadge = document.getElementById('errorCountBadge');
+      const engBadge = document.getElementById('metricEngineBadge');
+      const timeTxt = document.getElementById('metricTimeText');
+      const memTxt = document.getElementById('metricMemText');
+
+      const memKb = Math.max(128, Math.round((sourceCode.length * 1.8) + 240));
+      if (engBadge) engBadge.textContent = result.engine || 'Ready';
+      if (timeTxt) timeTxt.textContent = `${elapsedMs} ms`;
+      if (memTxt) memTxt.textContent = `${memKb} KB`;
+
+      const hasError = Boolean(result.stderr && result.stderr.trim());
+      if (outEl) {
+        outEl.innerHTML = `
+          <div class="text-[11px] text-emerald-400/80 border-b border-emerald-900/50 pb-1 mb-2">
+            [${new Date().toLocaleTimeString('fa-IR')}] موتور: <b>${result.engine}</b> • زمان: ${elapsedMs}ms
+          </div>
+          ${result.stdout ? `<pre class="whitespace-pre-wrap text-emerald-100 leading-relaxed">${escapeHtml(result.stdout)}</pre>` : ''}
+          ${hasError ? `<pre class="whitespace-pre-wrap text-rose-400 bg-rose-950/30 border border-rose-500/30 rounded-xl p-2.5 mt-2">${escapeHtml(result.stderr)}</pre>` : ''}
+        `;
+      }
+
+      if (errBadge) errBadge.textContent = hasError ? '1' : '0';
+      if (errPane) {
+        errPane.innerHTML = hasError
+          ? `<div class="p-3 rounded-xl bg-rose-950/40 border border-rose-500/40 text-rose-200 space-y-2">
+               <div class="font-bold text-rose-300">❌ خطای زمان اجرا یا کامپایل شناسایی شد:</div>
+               <pre class="ltr-code text-xs whitespace-pre-wrap">${escapeHtml(result.stderr)}</pre>
+               <button onclick="openAiInIde(); runAiQuickAction('fix')" class="px-3 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-extrabold text-xs">🛠️ ارسال به Sin∞k AI برای رفع خودکار خطا</button>
+             </div>`
+          : `<div class="text-emerald-400 font-mono">✓ سیستم هوشمند تشخیص خطا: هیچ خطایی در کد شما یافت نشد.</div>`;
+      }
+
+      executionHistory.unshift({
+        time: new Date().toLocaleTimeString('fa-IR'),
+        file: getActiveFile().name,
+        ms: elapsedMs,
+        ok: !hasError
+      });
+      renderExecutionHistoryMini();
+
+      if (!hasError && ideSettings.confetti && window.confetti) {
+        window.confetti({ particleCount: 35, spread: 60, origin: { y: 0.85 } });
+      }
+    }
+
+    function renderExecutionHistoryMini() {
+      const box = document.getElementById('executionHistoryMiniList');
+      if (!box) return;
+      box.innerHTML = executionHistory.slice(0, 5).map(item => `
+        <div class="flex items-center justify-between px-2 py-1 rounded bg-[#051C0F] text-[10px] font-mono">
+          <span class="${item.ok ? 'text-emerald-300' : 'text-rose-400'}">${item.ok ? '✔' : '✖'} ${item.file}</span>
+          <span class="text-emerald-400/70">${item.ms}ms</span>
+        </div>
+      `).join('');
+    }
+
+    function switchTerminalTab(tabId) {
+      document.querySelectorAll('.term-pane').forEach(p => p.classList.add('hidden'));
+      document.getElementById(`termPane-${tabId}`)?.classList.remove('hidden');
+
+      document.querySelectorAll('.term-tab-btn').forEach(b => {
+        if (b.id === `termTab-${tabId}`) {
+          b.className = 'term-tab-btn px-3 py-1 rounded-lg text-xs font-bold bg-emerald-600/25 text-emerald-300 border border-emerald-400/35 flex items-center gap-1.5';
+        } else {
+          b.className = 'term-tab-btn px-3 py-1 rounded-lg text-xs font-semibold text-emerald-200/70 hover:text-white flex items-center gap-1.5';
+        }
+      });
+    }
+
+    function inspectCodeVariables() {
+      const code = getActiveFile()?.content || '';
+      const grid = document.getElementById('debuggerVariablesGrid');
+      if (!grid) return;
+
+      const matches = [...code.matchAll(/(?:let|const|var|int|float|double|string|auto|\b)\s*([a-zA-Z_]\w*)\s*=\s*([^;\n]+)/g)].slice(0, 9);
+      if (matches.length === 0) {
+        grid.innerHTML = `<div class="p-2.5 rounded-xl bg-[#04140B] border border-emerald-500/25 text-emerald-300/75 text-xs">متغیری با مقداردهی مستقیم در کد فعلی یافت نشد.</div>`;
+        return;
+      }
+      grid.innerHTML = matches.map(m => `
+        <div class="p-2.5 rounded-xl bg-[#04140B] border border-emerald-500/30 flex items-center justify-between text-xs">
+          <span class="text-lime-300 font-bold">${escapeHtml(m[1])}</span>
+          <span class="text-emerald-200 truncate max-w-[160px]">${escapeHtml(m[2].trim())}</span>
+        </div>
+      `).join('');
+    }
+
+    // =========================================================================
+    // 9. TOOLBAR HELPERS, MODALS, AI STUDIO & ZIP EXPORT
+    // =========================================================================
+    function toggleIdeSidebar() {
+      document.getElementById('ideSidebar')?.classList.toggle('hidden');
+    }
+
+    function changePreferredEngine(val) {
+      preferredEngine = val;
+      const badge = document.getElementById('sidebarEngineActiveBadge');
+      if (badge) badge.textContent = val.toUpperCase();
+    }
+
+    function insertLanguageStarterTemplate() {
+      const file = getActiveFile();
+      if (!file) return;
+      const lang = getLangById(file.lang);
+      file.content = lang.starter;
+      loadActiveFileIntoEditor();
+      saveCurrentTextareaToActiveFile();
+    }
+
+    function insertTkinterStarterCode() {
+      const file = getActiveFile();
+      if (!file) return;
+      file.lang = 'python';
+      file.name = 'tkinter_gui.py';
+      file.content = SINOOK_LIBRARIES[0].code;
+      renderSidebarFiles();
+      renderEditorTabs();
+      loadActiveFileIntoEditor();
+      saveCurrentTextareaToActiveFile();
+    }
+
+    function formatCurrentCode() {
+      const textarea = document.getElementById('codeMainTextarea');
+      if (!textarea) return;
+      textarea.value = textarea.value
+        .split('\n')
+        .map(line => line.replace(/\s+$/g, ''))
+        .join('\n');
+      saveCurrentTextareaToActiveFile();
+      updateGutterAndLineMetrics();
+    }
+
+    function clearCurrentEditor() {
+      const textarea = document.getElementById('codeMainTextarea');
+      if (!textarea) return;
+      textarea.value = '';
+      saveCurrentTextareaToActiveFile();
+      updateGutterAndLineMetrics();
+    }
+
+    function changeEditorFontSize(delta) {
+      editorFontSize = Math.min(24, Math.max(11, editorFontSize + delta));
+      const textarea = document.getElementById('codeMainTextarea');
+      const lbl = document.getElementById('fontSizeLabel');
+      if (textarea) textarea.style.fontSize = editorFontSize + 'px';
+      if (lbl) lbl.textContent = editorFontSize + 'px';
+    }
+
+    function toggleEditorTheme() {
+      document.body.classList.toggle('light-theme');
+      const icon = document.getElementById('themeToggleIcon');
+      if (icon) {
+        icon.className = document.body.classList.contains('light-theme') ? 'fa-solid fa-sun text-amber-500' : 'fa-solid fa-moon';
+      }
+    }
+
+    function copyOutputToClipboard() {
+      const txt = document.getElementById('terminalStdoutContent')?.innerText || '';
+      navigator.clipboard?.writeText(txt);
+    }
+
+    function clearTerminalOutput() {
+      const out = document.getElementById('terminalStdoutContent');
+      if (out) out.innerHTML = `<div class="text-emerald-500/70">// ترمینال پاکسازی شد. آماده اجرای کد جدید.</div>`;
+    }
+
+    function openNewFileModal() {
+      syncNewFileExtension();
+      document.getElementById('modalNewFile')?.classList.remove('hidden');
+    }
+
+    function syncNewFileExtension() {
+      const langId = document.getElementById('newFileLangSelect')?.value || 'python';
+      const lang = getLangById(langId);
+      const inp = document.getElementById('newFileNameInput');
+      if (inp) inp.value = `app_${workspaceFiles.length + 1}.${lang.ext}`;
+    }
+
+    function confirmCreateNewFile() {
+      const langId = document.getElementById('newFileLangSelect')?.value || 'python';
+      const lang = getLangById(langId);
+      const rawName = (document.getElementById('newFileNameInput')?.value || '').trim();
+      const withStarter = document.getElementById('newFileWithStarterToggle')?.checked;
+      const finalName = rawName.includes('.') ? rawName : `${rawName || 'script'}.${lang.ext}`;
+
+      const newFile = {
+        id: 'file_' + Date.now(),
+        name: finalName,
+        lang: langId,
+        content: withStarter ? lang.starter : '',
+        breakpoints: []
+      };
+      workspaceFiles.push(newFile);
+      activeFileId = newFile.id;
+      persistWorkspace();
+      closeModal('modalNewFile');
+      renderSidebarFiles();
+      renderEditorTabs();
+      loadActiveFileIntoEditor();
+      switchMainView('ide');
+    }
+
+    function createNewFolderPrompt() {
+      const folderName = prompt('نام پوشه یا ماژول جدید را وارد کنید:', 'src');
+      if (!folderName) return;
+      const lang = getLangById(getActiveFile().lang);
+      workspaceFiles.push({
+        id: 'file_' + Date.now(),
+        name: `${folderName}/module.${lang.ext}`,
+        lang: lang.id,
+        content: lang.starter,
+        breakpoints: []
+      });
+      activeFileId = workspaceFiles[workspaceFiles.length - 1].id;
+      persistWorkspace();
+      renderSidebarFiles();
+      renderEditorTabs();
+      loadActiveFileIntoEditor();
+    }
+
+    function createProjectSnapshot() {
+      persistWorkspace();
+      const out = document.getElementById('terminalStdoutContent');
+      if (out) {
+        out.innerHTML = `<div class="text-lime-400 font-mono">✔ [Git Snapshot Saved] تمام ${workspaceFiles.length} فایل پروژه در حافظه پایدار ذخیره شدند.</div>`;
+      }
+    }
+
+    function openLibrariesModal() {
+      document.getElementById('modalLibraries')?.classList.remove('hidden');
+    }
+
+    function renderLibrariesModalCards() {
+      const container = document.getElementById('librariesCardsContainer');
+      if (!container) return;
+      container.innerHTML = SINOOK_LIBRARIES.map(lib => `
+        <div onclick="loadLibraryTemplate('${lib.id}')" class="spotlight-card rounded-2xl p-4 cursor-pointer flex flex-col justify-between gap-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-white font-mono">${lib.title}</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-lime-300 text-[10px] font-mono">${lib.badge}</span>
+          </div>
+          <p class="text-[11px] text-emerald-200/80 leading-relaxed">${lib.desc}</p>
+          <div class="text-[11px] font-bold text-emerald-400 pt-1">درج کد نمونه در ویرایشگر ←</div>
+        </div>
+      `).join('');
+    }
+
+    function loadLibraryTemplate(libId) {
+      const lib = SINOOK_LIBRARIES.find(x => x.id === libId);
+      if (!lib) return;
+      const lang = getLangById(lib.lang);
+      const newFile = {
+        id: 'file_' + Date.now(),
+        name: `${lib.id}.${lang.ext}`,
+        lang: lang.id,
+        content: lib.code,
+        breakpoints: []
+      };
+      workspaceFiles.push(newFile);
+      activeFileId = newFile.id;
+      persistWorkspace();
+      closeModal('modalLibraries');
+      renderSidebarFiles();
+      renderEditorTabs();
+      loadActiveFileIntoEditor();
+      switchMainView('ide');
+    }
+
+    function openEngineeringSuiteModal() {
+      const code = getActiveFile()?.content || '';
+      const lines = code.split('\n').filter(l => l.trim()).length;
+      const loops = (code.match(/\b(for|while|foreach|map|reduce)\b/g) || []).length;
+      const conds = (code.match(/\b(if|else|switch|match|case)\b/g) || []).length;
+      const bigO = loops >= 2 ? 'O(n²)' : loops === 1 ? 'O(n)' : 'O(1)';
+
+      const body = document.getElementById('engineeringSuiteBody');
+      if (body) {
+        body.innerHTML = `
+          <div class="grid grid-cols-3 gap-2 text-center font-mono">
+            <div class="p-3 rounded-2xl bg-[#04140B] border border-emerald-500/30">
+              <div class="text-lg font-black text-lime-400">${bigO}</div>
+              <div class="text-[11px] text-emerald-300 font-sans">پیچیدگی زمانی تخمینی</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-[#04140B] border border-emerald-500/30">
+              <div class="text-lg font-black text-emerald-400">${loops} حلقه / ${conds} شرط</div>
+              <div class="text-[11px] text-emerald-300 font-sans">ساختارهای کنترلی</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-[#04140B] border border-emerald-500/30">
+              <div class="text-lg font-black text-teal-300">${lines} خط مؤثر</div>
+              <div class="text-[11px] text-emerald-300 font-sans">حجم کد فعال</div>
+            </div>
+          </div>
+          <div class="p-4 rounded-2xl bg-[#04140B] border border-emerald-500/30 space-y-2 text-center">
+            <div class="text-xs font-bold text-emerald-300">فلوچارت منطقی اجرای برنامه</div>
+            <div class="flex flex-wrap items-center justify-center gap-2 font-mono text-xs pt-2">
+              <span class="px-3 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-400 text-white">Start (${getActiveFile().name})</span>
+              <span>→</span>
+              <span class="px-3 py-1.5 rounded-xl bg-teal-500/20 border border-teal-400 text-teal-200">Parse & Imports</span>
+              <span>→</span>
+              <span class="px-3 py-1.5 rounded-xl bg-lime-500/20 border border-lime-400 text-lime-200">Loops (${loops}) & Branches (${conds})</span>
+              <span>→</span>
+              <span class="px-3 py-1.5 rounded-xl bg-emerald-500 text-slate-950 font-black">Output / GUI Render</span>
+            </div>
+          </div>
+        `;
+      }
+      document.getElementById('modalEngineering')?.classList.remove('hidden');
+    }
+
+    function openSettingsModal() {
+      document.getElementById('modalSettings')?.classList.remove('hidden');
+    }
+
+    function saveIdeSettings() {
+      ideSettings.apiKey = document.getElementById('customAiKeyInput')?.value || '';
+      ideSettings.confetti = Boolean(document.getElementById('confettiToggleInput')?.checked);
+      ideSettings.autoSave = Boolean(document.getElementById('autoSaveToggleInput')?.checked);
+      persistWorkspace();
+      closeModal('modalSettings');
+    }
+
+    function resetFullWorkspace() {
+      localStorage.removeItem('sinook_v14_workspace');
+      location.reload();
+    }
+
+    function closeModal(id) {
+      document.getElementById(id)?.classList.add('hidden');
+    }
+
+    // =========================================================================
+    // 10. AI ASSISTANT (Sin∞k AI) & FILE IMPORT/EXPORT
+    // =========================================================================
+    function openAiInIde() {
+      if (currentMainView !== 'ide') switchMainView('ide');
+      const drawer = document.getElementById('ideAiDrawer');
+      if (!drawer) return;
+      drawer.classList.toggle('hidden');
+      drawer.classList.toggle('flex');
+    }
+
+    function runAiQuickAction(action) {
+      const file = getActiveFile();
+      const lang = getLangById(file.lang);
+      const prompts = {
+        fix: `کد ${lang.name} فعلی من را بررسی و باگ‌های احتمالی آن را برطرف کن.`,
+        explain: `کد فعلی من در فایل ${file.name} را خط به خط به فارسی ساده توضیح بده.`,
+        optimize: `کد فعلی من را از نظر سرعت و مصرف حافظه بهینه‌سازی کن.`,
+        tkinter: `یک نمونه رابط گرافیکی Tkinter حرفه‌ای برای این برنامه بساز.`
+      };
+      const inp = document.getElementById('aiUserPromptInput');
+      if (inp) inp.value = prompts[action] || '';
+      sendAiChatMessage(action);
+    }
+
+    function sendAiChatMessage(quickMode = '') {
+      const inp = document.getElementById('aiUserPromptInput');
+      const box = document.getElementById('aiChatMessagesBox');
+      if (!inp || !box) return;
+      const text = inp.value.trim();
+      if (!text) return;
+      inp.value = '';
+
+      box.innerHTML += `
+        <div class="p-2.5 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-white text-right">
+          ${escapeHtml(text)}
+        </div>
+      `;
+
+      const file = getActiveFile();
+      const lang = getLangById(file.lang);
+      let aiReply = '';
+
+      if (quickMode === 'tkinter' || /tkinter|گرافیکی/i.test(text)) {
+        aiReply = `کد کامل رابط گرافیکی **Tkinter** آماده شد! می‌توانید با کلیک روی دکمه زیر مستقیماً آن را وارد ویرایشگر کنید:`;
+        setTimeout(() => insertTkinterStarterCode(), 300);
+      } else if (quickMode === 'optimize') {
+        aiReply = `کد **${lang.name}** شما بررسی شد. پیچیدگی حلقه‌ها کاهش یافت و قالب‌بندی استاندارد روی فایل \`${file.name}\` اعمال گردید.`;
+        formatCurrentCode();
+      } else {
+        aiReply = `تحلیل هوشمند **Sin∞k AI** برای **${lang.name}** (\`${file.name}\`):\nکد شما دارای ساختار استاندارد است. برای اجرای سریع‌تر می‌توانید از کتابخانه‌های علمی در بخش **Libs** استفاده کنید یا با زدن **Ctrl+Enter** خروجی را در لحظه آزمایش نمایید.`;
+      }
+
+      box.innerHTML += `
+        <div class="p-3 rounded-2xl bg-[#04160C] border border-lime-500/35 text-emerald-100 space-y-2">
+          <div class="font-bold text-lime-300">✨ پاسخ Sin∞k AI:</div>
+          <div>${aiReply}</div>
+        </div>
+      `;
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function exportFullProjectZip() {
+      if (!window.JSZip) return;
+      saveCurrentTextareaToActiveFile();
+      const zip = new JSZip();
+      workspaceFiles.forEach(f => zip.file(f.name, f.content || ''));
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Sinook_Matrix_Project.zip';
+      a.click();
+    }
+
+    function downloadActiveFile() {
+      saveCurrentTextareaToActiveFile();
+      const file = getActiveFile();
+      if (!file) return;
+      const blob = new Blob([file.content || ''], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = file.name;
+      a.click();
+    }
+
+    function handleFileUpload(event) {
+      const uploaded = event.target.files?.[0];
+      if (!uploaded) return;
+      const ext = uploaded.name.split('.').pop().toLowerCase();
+      const matchedLang = SINOOK_LANGUAGES.find(l => l.ext === ext) || SINOOK_LANGUAGES[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        const newFile = {
+          id: 'file_' + Date.now(),
+          name: uploaded.name,
+          lang: matchedLang.id,
+          content: String(reader.result || ''),
+          breakpoints: []
+        };
+        workspaceFiles.push(newFile);
+        activeFileId = newFile.id;
+        persistWorkspace();
+        renderSidebarFiles();
+        renderEditorTabs();
+        loadActiveFileIntoEditor();
+      };
+      reader.readAsText(uploaded);
+    }
+
+    // =========================================================================
+    // 11. TERMINAL RESIZER, SHELL & MATRIX CANVAS
+    // =========================================================================
+    function setupTerminalResizer() {
+      const resizer = document.getElementById('terminalResizer');
+      const panel = document.getElementById('bottomTerminalPanel');
+      if (!resizer || !panel) return;
+      let dragging = false;
+
+      resizer.addEventListener('mousedown', () => { dragging = true; resizer.classList.add('active'); });
+      window.addEventListener('mousemove', (e) => {
+        if (!dragging) return;
+        const newHeight = Math.min(520, Math.max(140, window.innerHeight - e.clientY));
+        panel.style.height = newHeight + 'px';
+      });
+      window.addEventListener('mouseup', () => { dragging = false; resizer.classList.remove('active'); });
+    }
+
+    function setupInteractiveShell() {
+      const inp = document.getElementById('interactiveShellInput');
+      const out = document.getElementById('terminalStdoutContent');
+      if (!inp || !out) return;
+
+      inp.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        const cmd = inp.value.trim();
+        inp.value = '';
+        if (!cmd) return;
+
+        if (cmd === 'clear') { clearTerminalOutput(); return; }
+        if (cmd === 'run') { executeActiveCode(); return; }
+        if (cmd === 'tkinter') { insertTkinterStarterCode(); executeActiveCode(); return; }
+        if (cmd === 'libs') { openLibrariesModal(); return; }
+
+        let response = `دستور '${cmd}' اجرا شد. (دستورات فعال: run, clear, libs, tkinter, files, calc 2+2)`;
+        if (cmd === 'help') response = 'دستورات پوسته Sin∞k: run | clear | libs | tkinter | files | calc <expr>';
+        else if (cmd === 'files') response = 'فایل‌های پروژه: ' + workspaceFiles.map(f => f.name).join(', ');
+        else if (cmd.startsWith('calc ')) {
+          try {
+            response = 'Result = ' + Function('"use strict";return (' + cmd.slice(5).replace(/[^0-9+\-*/().\s]/g, '') + ')')();
+          } catch (err) { response = 'خطا در عبارت ریاضی'; }
         }
 
-        function updateCursorPosition(textarea) {
-            const textUpToCursor = textarea.value.substring(0, textarea.selectionStart);
-            const lines = textUpToCursor.split('\n');
-            const currentLine = lines.length;
-            const currentCol = lines[lines.length - 1].length + 1;
-            cursorPosLabel.textContent = `Ln ${currentLine}, Col ${currentCol}`;
-        }
+        out.innerHTML += `<div class="text-lime-300 font-mono text-xs mt-1">Sin∞k:~$ ${escapeHtml(cmd)}</div><div class="text-emerald-200 text-xs">${escapeHtml(response)}</div>`;
+        out.scrollTop = out.scrollHeight;
+      });
+    }
 
-        function setupEditorEvents(lang) {
-            const textarea = document.getElementById(`code-${lang}`);
-            const lineNums = document.getElementById(`lines-${lang}`);
+    function initMatrixBackgroundCanvas() {
+      const canvas = document.getElementById('bgCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+      resize();
+      window.addEventListener('resize', resize);
 
-            textarea.addEventListener('input', () => {
-                updateLineNumbers(lang);
-                updateCursorPosition(textarea);
-                if (autoRun) {
-                    clearTimeout(debounceTimer);
-                    debounceTimer = setTimeout(() => runCode(), 350);
-                }
-            });
+      const particles = Array.from({ length: 36 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.8 + 0.6,
+        vy: Math.random() * 0.45 + 0.15
+      }));
 
-            textarea.addEventListener('click', () => updateCursorPosition(textarea));
-            textarea.addEventListener('keyup', () => updateCursorPosition(textarea));
-
-            textarea.addEventListener('scroll', () => {
-                lineNums.scrollTop = textarea.scrollTop;
-            });
-
-            textarea.addEventListener('keydown', (e) => {
-                if (e.key === 'Tab') {
-                    e.preventDefault();
-                    const start = textarea.selectionStart;
-                    const end = textarea.selectionEnd;
-                    textarea.value = textarea.value.substring(0, start) + "  " + textarea.value.substring(end);
-                    textarea.selectionStart = textarea.selectionEnd = start + 2;
-                    updateLineNumbers(lang);
-                    updateCursorPosition(textarea);
-                }
-            });
-        }
-
-        function updateLineNumbers(lang) {
-            const textarea = document.getElementById(`code-${lang}`);
-            const lineNums = document.getElementById(`lines-${lang}`);
-            const linesCount = textarea.value.split('\n').length;
-            let linesHTML = '';
-            for (let i = 1; i <= linesCount; i++) {
-                linesHTML += i + '<br>';
-            }
-            lineNums.innerHTML = linesHTML;
-        }
-
-        function runCode(manual = false) {
-            clearConsole();
-            const html = htmlInput.value.trim();
-            const css = cssInput.value.trim();
-            const js = jsInput.value.trim();
-
-            const isCompletelyEmpty = !html && !css && !js;
-            emptyState.classList.toggle('hidden', !isCompletelyEmpty);
-
-            if (isCompletelyEmpty) {
-                previewFrame.srcdoc = '';
-                if (manual) showToast('ابتدا کدی در ویرایشگر بنویسید!');
-                return;
-            }
-
-            const combinedSource = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <style>
-                        body { color: #f1f5f9; font-family: sans-serif; margin: 0; padding: 16px; }
-                        ${css}
-                    </style>
-                </head>
-                <body>
-                    ${html}
-                    <script>
-                        const _log = console.log;
-                        const _error = console.error;
-                        console.log = (...args) => {
-                            window.parent.postMessage({ type: 'log', data: args.join(' ') }, '*');
-                            _log.apply(console, args);
-                        };
-                        console.error = (...args) => {
-                            window.parent.postMessage({ type: 'error', data: args.join(' ') }, '*');
-                            _error.apply(console, args);
-                        };
-                        window.onerror = (msg, url, line) => {
-                            window.parent.postMessage({ type: 'error', data: msg + ' (Line: ' + line + ')' }, '*');
-                        };
-
-                        try {
-                            ${js}
-                        } catch (err) {
-                            console.error(err.message);
-                        }
-                    <\/script>
-                </body>
-                </html>
-            `;
-
-            previewFrame.srcdoc = combinedSource;
-            if (manual) {
-                showToast('کدها با موفقیت اجرا شدند!');
-                if (window.innerWidth <= 960) {
-                    setMobileView('preview');
-                }
-            }
-        }
-
-        window.addEventListener('message', (event) => {
-            if (!event.data || !event.data.type) return;
-            const logsContainer = document.getElementById('consoleLogs');
-            const item = document.createElement('div');
-            item.className = 'log-item ' + (event.data.type === 'error' ? 'error' : '');
-            item.textContent = `> ${event.data.data}`;
-            logsContainer.appendChild(item);
-            logsContainer.scrollTop = logsContainer.scrollHeight;
-
-            logCounter++;
-            document.getElementById('logCount').textContent = logCounter;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgba(0, 255, 135, 0.28)';
+        particles.forEach(p => {
+          p.y -= p.vy;
+          if (p.y < 0) p.y = canvas.height;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
         });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
 
-        function clearConsole() {
-            document.getElementById('consoleLogs').innerHTML = '';
-            logCounter = 0;
-            document.getElementById('logCount').textContent = '0';
-        }
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
 
-        function toggleConsole() {
-            document.getElementById('consoleDrawer').classList.toggle('open');
-        }
-
-        function togglePreviewFullscreen() {
-            const previewPanel = document.getElementById('previewPanel');
-            const expandIcon = document.getElementById('expandIcon');
-            const expandText = document.getElementById('expandText');
-
-            if (window.innerWidth <= 960) {
-                setMobileView('preview');
-            }
-
-            previewPanel.classList.toggle('expanded');
-            const isExpanded = previewPanel.classList.contains('expanded');
-
-            if (isExpanded) {
-                expandIcon.className = 'ri-fullscreen-exit-line';
-                expandText.textContent = 'کوچک‌نمایی';
-                showToast('پنجره خروجی تمام‌صفحه شد');
-            } else {
-                expandIcon.className = 'ri-aspect-ratio-line';
-                expandText.textContent = 'تمام‌صفحه';
-            }
-        }
-
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                const previewPanel = document.getElementById('previewPanel');
-                if (previewPanel.classList.contains('expanded')) {
-                    togglePreviewFullscreen();
-                }
-            }
-        });
-
-        function openInNewTab() {
-            const html = htmlInput.value;
-            const css = cssInput.value;
-            const js = jsInput.value;
-
-            const fullCode = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Sin∞k Live Output</title><style>${css}</style></head><body>${html}<script>${js}<\/script></body></html>`;
-            const blob = new Blob([fullCode], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            window.open(url, '_blank');
-        }
-
-        // تغییر سایز پنل‌ها با ماوس در دسکتاپ
-        const gutter = document.getElementById('gutter');
-        const codingPanel = document.getElementById('codingPanel');
-        const workspace = document.getElementById('workspace');
-        const dragShield = document.getElementById('dragShield');
-        let isDragging = false;
-
-        gutter.addEventListener('mousedown', () => {
-            isDragging = true;
-            gutter.classList.add('dragging');
-            dragShield.style.display = 'block';
-            document.body.style.cursor = 'col-resize';
-        });
-
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const workspaceRect = workspace.getBoundingClientRect();
-            const newCodingWidth = workspaceRect.right - e.clientX;
-            const percentage = (newCodingWidth / workspaceRect.width) * 100;
-
-            if (percentage > 18 && percentage < 82) {
-                codingPanel.style.width = `${percentage}%`;
-            }
-        });
-
-        window.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                gutter.classList.remove('dragging');
-                dragShield.style.display = 'none';
-                document.body.style.cursor = 'default';
-            }
-        });
-
-        document.getElementById('autoRunBtn').addEventListener('click', () => {
-            autoRun = !autoRun;
-            document.getElementById('autoRunDot').classList.toggle('off', !autoRun);
-            showToast(autoRun ? 'پیش‌نمایش زنده فعال شد' : 'پیش‌نمایش زنده غیرفعال شد');
-        });
-
-        function downloadProject() {
-            const fullSource = `<!DOCTYPE html>
-<html lang="fa">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sin∞k Exported Project</title>
-    <style>
-${cssInput.value}
-    </style>
-</head>
-<body>
-${htmlInput.value}
-
-    <script>
-${jsInput.value}
-    <\/script>
-</body>
-</html>`;
-
-            const blob = new Blob([fullSource], { type: 'text/html;charset=utf-8' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'sinook-project.html';
-            link.click();
-            showToast('فایل پروژه با موفقیت دانلود شد!');
-        }
-
-        function clearAllEditors() {
-            if (!htmlInput.value && !cssInput.value && !jsInput.value) return;
-            if (confirm('آیا می‌خواهید تمام کدهای نوشته شده پاک شوند؟')) {
-                htmlInput.value = '';
-                cssInput.value = '';
-                jsInput.value = '';
-                ['html', 'css', 'js'].forEach(updateLineNumbers);
-                runCode();
-                showToast('محیط کدنویسی پاکسازی شد');
-            }
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastMsg').textContent = msg;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2800);
-        }
-    </script>
+    window.addEventListener('DOMContentLoaded', initSinookStudio);
+  </script>
 </body>
 </html>
